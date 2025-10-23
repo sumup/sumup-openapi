@@ -31,3 +31,12 @@ components:
           type: string
           format: uri
           description: A URI reference that identifies the specific occurrence of the problem.
+  parameters:
+    MerchantCode:
+      name: merchant_code
+      description: Short unique identifier for the merchant.
+      in: path
+      required: true
+      schema:
+        type: string
+        example: MK10CL2A
