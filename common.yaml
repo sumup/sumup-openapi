@@ -31,6 +31,12 @@ components:
           type: string
           format: uri
           description: A URI reference that identifies the specific occurrence of the problem.
+    Metadata:
+      description: >-
+        Set of user-defined key-value pairs attached to the object. Partial updates are not supported. When updating, always submit whole metadata. Maximum of 64 parameters are allowed in the object.
+      type: object
+      maxProperties: 64
+      example: {}
   parameters:
     MerchantCode:
       name: merchant_code
