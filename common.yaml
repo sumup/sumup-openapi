@@ -37,6 +37,7 @@ components:
       type: object
       maxProperties: 64
       example: {}
+      x-go-type-skip-optional-pointer: true
   parameters:
     MerchantCode:
       name: merchant_code
