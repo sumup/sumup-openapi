@@ -2250,6 +2250,18 @@
             }
           },
           {
+            "name": "entry_modes[]",
+            "in": "query",
+            "description": "Filters the returned results by the specified list of entry modes.",
+            "required": false,
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/components/schemas/EntryModeFilter"
+              }
+            }
+          },
+          {
             "name": "types",
             "in": "query",
             "description": "Filters the returned results by the specified list of transaction types.",
@@ -5499,7 +5511,7 @@
             }
           },
           "404": {
-            "description": "The requested Reader resource does not exists.",
+            "description": "The requested Reader resource does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5566,7 +5578,7 @@
             "description": "Returns an empty response if the deletion succeeded."
           },
           "404": {
-            "description": "The requested Reader resource does not exists.",
+            "description": "The requested Reader resource does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5668,7 +5680,7 @@
             }
           },
           "404": {
-            "description": "The requested Reader resource does not exists.",
+            "description": "The requested Reader resource does not exist.",
             "content": {
               "application/json": {
                 "schema": {
@@ -5838,7 +5850,8 @@
                   "200": {
                     "description": "Your server returns this code if it accepts the callback.\nIf the server returns any other code, the callback will be retried up to 5 times with exponential backoff.\n"
                   }
-                }
+                },
+                "callbacks": {}
               }
             }
           }
@@ -5900,6 +5913,7 @@
           {
             "name": "Accept",
             "in": "header",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string",
@@ -5911,6 +5925,7 @@
           {
             "name": "Content-Type",
             "in": "header",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string",
@@ -5922,6 +5937,7 @@
           {
             "name": "Authorization",
             "in": "header",
+            "description": "",
             "required": true,
             "schema": {
               "type": "string",
@@ -6003,6 +6019,7 @@
             }
           }
         },
+        "callbacks": {},
         "security": [
           {
             "apiKey": []
@@ -6133,6 +6150,7 @@
             }
           }
         },
+        "callbacks": {},
         "security": [
           {
             "apiKey": []
@@ -6195,6 +6213,18 @@
         "description": "Unique ID of the saved customer resource.",
         "schema": {
           "type": "string"
+        }
+      },
+      "EntryModesFilter": {
+        "name": "entry_modes[]",
+        "in": "query",
+        "description": "Filters the returned results by the specified list of entry modes.",
+        "required": false,
+        "schema": {
+          "type": "array",
+          "items": {
+            "$ref": "#/components/schemas/EntryModeFilter"
+          }
         }
       },
       "GeoCoordinatesFilter": {
@@ -8266,51 +8296,61 @@
         "description": "Entry mode of the payment details.",
         "type": "string",
         "enum": [
-          "BOLETO",
-          "SOFORT",
-          "IDEAL",
-          "BANCONTACT",
-          "EPS",
-          "MYBANK",
-          "SATISPAY",
-          "BLIK",
-          "P24",
-          "GIROPAY",
-          "PIX",
-          "QR_CODE_PIX",
-          "APPLE_PAY",
-          "GOOGLE_PAY",
-          "PAYPAL",
-          "NONE",
-          "CHIP",
-          "MANUAL_ENTRY",
-          "CUSTOMER_ENTRY",
-          "MAGSTRIPE_FALLBACK",
-          "MAGSTRIPE",
-          "DIRECT_DEBIT",
-          "CONTACTLESS",
-          "MOTO",
-          "CONTACTLESS_MAGSTRIPE",
-          "N/A"
+          "none",
+          "magstripe",
+          "chip",
+          "manual entry",
+          "customer entry",
+          "magstripe fallback",
+          "contactless",
+          "moto",
+          "contactless magstripe",
+          "boleto",
+          "direct debit",
+          "sofort",
+          "ideal",
+          "bancontact",
+          "eps",
+          "mybank",
+          "satispay",
+          "blik",
+          "p24",
+          "giropay",
+          "pix",
+          "qr code pix",
+          "apple pay",
+          "google pay",
+          "paypal",
+          "na"
         ]
       },
       "CardType": {
         "description": "Issuing card network of the payment card used for the transaction.",
         "type": "string",
         "enum": [
+          "ALELO",
           "AMEX",
+          "CONECS",
           "CUP",
           "DINERS",
           "DISCOVER",
+          "EFTPOS",
           "ELO",
           "ELV",
+          "GIROCARD",
           "HIPERCARD",
+          "INTERAC",
           "JCB",
           "MAESTRO",
           "MASTERCARD",
+          "PLUXEE",
+          "SWILE",
+          "TICKET",
           "VISA",
           "VISA_ELECTRON",
           "VISA_VPAY",
+          "VPAY",
+          "VR",
           "UNKNOWN"
         ]
       },
@@ -11068,6 +11108,38 @@
           "date_of_birth",
           "address"
         ]
+      },
+      "EntryModeFilter": {
+        "description": "Entry mode value accepted by the `entry_modes[]` filter.",
+        "type": "string",
+        "enum": [
+          "BOLETO",
+          "SOFORT",
+          "IDEAL",
+          "BANCONTACT",
+          "EPS",
+          "MYBANK",
+          "SATISPAY",
+          "BLIK",
+          "P24",
+          "GIROPAY",
+          "PIX",
+          "QR_CODE_PIX",
+          "APPLE_PAY",
+          "GOOGLE_PAY",
+          "PAYPAL",
+          "NONE",
+          "CHIP",
+          "MANUAL_ENTRY",
+          "CUSTOMER_ENTRY",
+          "MAGSTRIPE_FALLBACK",
+          "MAGSTRIPE",
+          "DIRECT_DEBIT",
+          "CONTACTLESS",
+          "MOTO",
+          "CONTACTLESS_MAGSTRIPE",
+          "N/A"
+        ]
       }
     },
     "examples": {
@@ -11104,6 +11176,7 @@
     },
     "requestBodies": {
       "BankAccounts": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11114,6 +11187,7 @@
       },
       "CheckoutCreate": {
         "required": true,
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11266,6 +11340,7 @@
       },
       "CustomerUpdate": {
         "required": true,
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11280,6 +11355,7 @@
         }
       },
       "DoingBusinessAsLegacy": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11289,6 +11365,7 @@
         }
       },
       "MerchantProfile": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11298,6 +11375,7 @@
         }
       },
       "MerchantSettings": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11307,6 +11385,7 @@
         }
       },
       "PaymentInstrument": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11316,6 +11395,7 @@
         }
       },
       "PersonalProfile": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
@@ -11325,6 +11405,7 @@
         }
       },
       "Refund": {
+        "description": "",
         "content": {
           "application/json": {
             "schema": {
