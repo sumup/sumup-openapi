@@ -4628,6 +4628,14 @@ components:
         type:
           description: Specifies the media type of the related resource.
           type: string
+        min_amount:
+          description: Minimum allowed amount for the refund.
+          type: number
+          format: float
+        max_amount:
+          description: Maximum allowed amount for the refund.
+          type: number
+          format: float
       title: Link
     TransactionsHistoryLink:
       description: Hypermedia link used for transaction history pagination.
@@ -5245,6 +5253,7 @@ components:
         - apple pay
         - google pay
         - paypal
+        - twint
         - na
       title: Entry Mode
     CardType:
@@ -7490,6 +7499,7 @@ components:
         - APPLE_PAY
         - GOOGLE_PAY
         - PAYPAL
+        - TWINT
         - NONE
         - CHIP
         - MANUAL_ENTRY
