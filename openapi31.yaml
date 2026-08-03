@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: SumUp REST API
   version: 1.0.0
@@ -2372,8 +2372,9 @@ paths:
 
             When filtering by parent both `resource.parent.id` and `resource.parent.type` must be present. Pass explicit null to filter for resources without a parent.
           schema:
-            type: string
-            nullable: true
+            type:
+              - string
+              - "null"
         - name: resource.parent.type
           in: query
           description: >-
@@ -2381,9 +2382,9 @@ paths:
 
             When filtering by parent both `resource.parent.id` and `resource.parent.type` must be present. Pass explicit null to filter for resources without a parent.
           schema:
-            nullable: true
             allOf:
               - $ref: '#/components/schemas/ResourceType'
+            type: "null"
         - name: roles
           in: query
           description: Filter the returned memberships by role.
@@ -4396,12 +4397,13 @@ components:
           description: |-
             Date and time of the creation of the payment checkout. Response format expressed according to [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) code.
         valid_until:
-          type: string
+          type:
+            - string
+            - "null"
           example: '2020-02-29T10:56:56+00:00'
           format: date-time
           description: |-
             Optional expiration timestamp. The checkout must be processed before this moment, otherwise it becomes unusable. If omitted, the checkout does not have an explicit expiry time.
-          nullable: true
         customer_id:
           type: string
           description: |-
@@ -4487,12 +4489,13 @@ components:
             - CHECKOUT
             - SETUP_RECURRING_PAYMENT
         valid_until:
-          type: string
+          type:
+            - string
+            - "null"
           example: '2020-02-29T10:56:56+00:00'
           format: date-time
           description: |-
             Optional expiration timestamp. The checkout must be processed before this moment, otherwise it becomes unusable. If omitted, the checkout does not have an explicit expiry time.
-          nullable: true
         redirect_url:
           type: string
           example: https://mysite.com/completed_purchase
@@ -4530,12 +4533,13 @@ components:
             Updated merchant-defined reference for the checkout.
           example: f00a8f74-b05d-4605-bd73-2a901bae5802
         valid_until:
-          type: string
+          type:
+            - string
+            - "null"
           example: '2020-02-29T10:56:56+00:00'
           format: date-time
           description: |-
             Updated expiration timestamp. The checkout must be processed before this moment, otherwise it becomes unusable.
-          nullable: true
         customer_id:
           type: string
           description: |-
@@ -6957,19 +6961,21 @@ components:
         citizenship:
           $ref: '#/components/schemas/CountryCode'
         nationality:
-          type: string
+          type:
+            - string
+            - "null"
           description: >
             The Person's nationality. May be an [ISO3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code, but legacy data may not conform to this standard.
 
-          nullable: true
         country_of_residence:
-          type: string
+          type:
+            - string
+            - "null"
           description: >
             An [ISO3166-1 alpha-2](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) country code representing the country where the Person resides.
 
           minLength: 2
           maxLength: 2
-          nullable: true
         version:
           $ref: '#/components/schemas/Version'
         change_status:
@@ -7227,8 +7233,9 @@ components:
               enum:
                 - credit
                 - debit
-              nullable: true
-              type: string
+              type:
+                - string
+                - "null"
             checkout_id:
               description: Unique identifier for the checkout
               format: uuid
@@ -7242,16 +7249,19 @@ components:
               type: string
             installments:
               description: Number of installments for the transaction. Required for some countries.
-              nullable: true
-              type: integer
+              type:
+                - integer
+                - "null"
             payment_failure_reason:
               description: Payment failure reason
-              nullable: true
-              type: string
+              type:
+                - string
+                - "null"
             payment_status:
               description: Payment status from payments v2 event
-              nullable: true
-              type: string
+              type:
+                - string
+                - "null"
             payment_type:
               description: Type of the payment. Required for some countries
               enum:
@@ -7313,8 +7323,9 @@ components:
             valid_until:
               description: Checkout expiration timestamp. After this time, the checkout will be automatically cancelled.
               format: date-time
-              nullable: true
-              type: string
+              type:
+                - string
+                - "null"
           required:
             - checkout_id
             - client_transaction_id
@@ -7570,7 +7581,6 @@ components:
           description: |
             Affiliate metadata for the transaction.
             It is a field that allow for integrators to track the source of the transaction.
-          nullable: true
           properties:
             app_id:
               description: |
@@ -7605,7 +7615,9 @@ components:
             - key
             - foreign_transaction_id
           title: Affiliate
-          type: object
+          type:
+            - object
+            - "null"
         card_type:
           description: |
             The card type of the card used for the transaction.
@@ -7628,8 +7640,9 @@ components:
             Otherwise, the checkout will be rejected.
           example: 1
           minimum: 1
-          nullable: true
-          type: integer
+          type:
+            - integer
+            - "null"
         return_url:
           description: |
             Webhook URL to which the payment result will be sent.
