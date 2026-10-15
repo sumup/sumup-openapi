@@ -5836,6 +5836,7 @@ components:
         - MAESTRO
         - MASTERCARD
         - PLUXEE
+        - SUMUP
         - SWILE
         - TICKET
         - VISA
