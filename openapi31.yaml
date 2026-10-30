@@ -99,6 +99,17 @@ tags:
       A Merchant represents a single business which can use SumUp products like payment processing.
     x-core-objects:
       - $ref: "#/components/schemas/Merchant"
+  - name: Tokens
+    description: |-
+      Merchant tokens let your application accept card-present payments with SumUp SDKs that support token-based authentication. Use them when you want users to sign in to your application with your own authentication, then accept payments for a SumUp merchant account.
+
+      Create tokens on your backend using one of the [supported authentication methods](https://developer.sumup.com/api/authentication). Keep your authentication credentials on your backend. Return only the short-lived merchant token to your application and pass its `access_token` to the SDK.
+
+      Before returning a token, authenticate the user in your application and check that they can accept payments for the requested merchant account. A merchant token is limited to that account and the requested actions, and does not grant permissions beyond those of the identity that created it.
+
+      Tokens expire 15 minutes after creation. Use `expires_in` to determine the remaining lifetime and create a new token when needed. This endpoint does not return a refresh token. Treat merchant tokens as secrets: send them over HTTPS and keep them out of URLs, logs, and source code.
+    x-core-objects:
+      - $ref: '#/components/schemas/Token'
 paths:
   /v0.1/merchants/{merchant_code}/payment-methods:
     get:
@@ -254,6 +265,18 @@ paths:
                   description: A sample checkout
                   hosted_checkout:
                     enabled: true
+                  redirect_url: https://example.com/orders/123/complete
+              Tokenization:
+                summary: Save a customer card
+                description: Create a checkout to collect consent and save a card through the Payment Widget.
+                value:
+                  checkout_reference: save-card-123
+                  amount: 1
+                  currency: EUR
+                  merchant_code: MCXXXXXX
+                  description: Save a card for future payments
+                  customer_id: 831ff8d4cd5958ab5670
+                  purpose: SETUP_RECURRING_PAYMENT
       responses:
         '201':
           description: Returns the created checkout resource.
@@ -370,6 +393,20 @@ paths:
                     hosted_checkout:
                       enabled: true
                     hosted_checkout_url: https://checkout.sumup.com/pay/8f9316a3-cda9-42a9-9771-54d534315676
+                    transactions: []
+                Tokenization:
+                  summary: Checkout for saving a card
+                  value:
+                    checkout_reference: save-card-123
+                    amount: 1
+                    currency: EUR
+                    merchant_code: MCXXXXXX
+                    description: Save a card for future payments
+                    customer_id: 831ff8d4cd5958ab5670
+                    purpose: SETUP_RECURRING_PAYMENT
+                    id: 7164c99b-13cb-42a1-8ba1-3c2c46a29de7
+                    status: PENDING
+                    date: '2026-10-30T12:00:00+00:00'
                     transactions: []
         '400':
           description: The request body is invalid.
@@ -518,17 +555,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CheckoutSuccess'
-              example:
-                checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
-                amount: 10.1
-                currency: EUR
-                merchant_code: MH4H92C7
-                description: Purchase
-                id: 4e425463-3e1b-431d-83fa-1e51c2925e99
-                status: PENDING
-                date: '2020-02-29T10:56:56+00:00'
-                transaction_code: TEENSK4W2K
-                transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+              examples:
+                Checkout:
+                  value:
+                    checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
+                    amount: 10.1
+                    currency: EUR
+                    merchant_code: MH4H92C7
+                    description: Purchase
+                    id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+                    status: PENDING
+                    date: '2020-02-29T10:56:56+00:00'
+                    transaction_code: TEENSK4W2K
+                    transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+                PaidCheckout:
+                  summary: Paid checkout with a transaction to refund
+                  value:
+                    checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
+                    amount: 42.42
+                    currency: EUR
+                    merchant_code: MH4H92C7
+                    description: Purchase
+                    id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+                    status: PAID
+                    date: '2020-02-29T10:56:56+00:00'
+                    transaction_code: TEENSK4W2K
+                    transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+                    transactions:
+                      - id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+                        transaction_code: TEENSK4W2K
+                        amount: 42.42
+                        currency: EUR
+                        status: SUCCESSFUL
+                        timestamp: '2026-10-30T12:00:00+00:00'
+                TokenizedCheckout:
+                  summary: Checkout with a saved card
+                  value:
+                    checkout_reference: save-card-123
+                    amount: 1
+                    currency: EUR
+                    merchant_code: MCXXXXXX
+                    description: Save a card for future payments
+                    customer_id: 831ff8d4cd5958ab5670
+                    purpose: SETUP_RECURRING_PAYMENT
+                    id: 7164c99b-13cb-42a1-8ba1-3c2c46a29de7
+                    status: PAID
+                    date: '2026-10-30T12:00:00+00:00'
+                    transactions: []
+                    payment_instrument:
+                      token: 6878cb7f-6515-47bf-bdd9-1408d270fdce
         '401':
           description: The request is not authorized.
           content:
@@ -691,9 +766,8 @@ paths:
                 description: Process a checkout with a token
                 value:
                   payment_type: card
-                  installments: 1
-                  token: ba85dfee-c3cf-48a6-84f5-d7d761fbba50
-                  customer_id: MEDKHDTI
+                  token: 6878cb7f-6515-47bf-bdd9-1408d270fdce
+                  customer_id: 831ff8d4cd5958ab5670
               ProcessBoleto:
                 description: Process a checkout with Boleto
                 value:
@@ -1185,24 +1259,7 @@ paths:
               schema:
                 oneOf:
                   - $ref: '#/components/schemas/ErrorExtended'
-                  - type: object
-                    required:
-                      - instance
-                      - error_code
-                      - error_message
-                    properties:
-                      instance:
-                        type: string
-                        description: Unique identifier of this error occurrence.
-                        example: 32a44c6c-85d3-49e8-86bf-a5bba98c4621
-                      error_code:
-                        type: string
-                        description: Platform code for the error.
-                        example: INVALID
-                      error_message:
-                        type: string
-                        description: Short description of the error.
-                        example: customer_id
+                  - $ref: '#/components/schemas/CustomerValidationError'
               examples:
                 Missing_Customer_ID:
                   description: The required customer identifier is missing.
@@ -1603,8 +1660,6 @@ paths:
         description: Optional amount for partial refunds.
         content:
           application/json:
-            example:
-              amount: 5
             schema:
               type: object
               description: Optional amount for partial refunds of transactions.
@@ -1612,9 +1667,16 @@ paths:
                 amount:
                   type: number
                   format: float
-                  description: |-
-                    Amount to refund in major units of the transaction's currency, for example `5` for EUR 5.00. It must be greater than zero and cannot exceed the amount eligible for a refund. Eligibility depends on the transaction and country/currency rules. If omitted, the system requests a full refund.
+                  description: Amount to refund in major units of the transaction's currency, for example `5` for EUR 5.00. It must be greater than zero and cannot exceed the amount eligible for a refund. Eligibility depends on the transaction and country/currency rules. If omitted, the system requests a full refund.
                   example: 5
+            examples:
+              FullRefund:
+                summary: Full refund
+                value: {}
+              PartialRefund:
+                summary: Partial refund
+                value:
+                  amount: 24.42
       responses:
         '201':
           description: The transaction was refunded in full or partially based on the request.
@@ -3853,6 +3915,10 @@ paths:
 
 
         **Note**: If the target device is a Solo, it must be in version 3.3.24.3 or higher.
+
+
+        Optionally include an `affiliate` object to attach integrator metadata to the payment.
+        Provide both `app_id` and `key` when including this object.
       operationId: CreateReaderCheckout
       parameters:
         - description: Merchant Code
@@ -3874,6 +3940,12 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/CreateReaderCheckoutRequest'
+            example:
+              total_amount:
+                currency: EUR
+                minor_unit: 2
+                value: 1500
+              return_url: https://example.com/sumup/webhook
         description: A checkout initial attributes
         required: true
       responses:
@@ -3886,14 +3958,18 @@ paths:
         '400':
           content:
             application/json:
+              example:
+                errors:
+                  detail: Invalid affiliate key.
+                  type: INVALID_AFFILIATE_KEY
               schema:
                 $ref: '#/components/schemas/CreateReaderCheckoutError'
             application/problem+json:
               example:
-                detail: Bad Request
+                detail: Invalid affiliate key.
                 status: 400
-                title: Bad Request
-                type: https://developer.sumup.com/problem/bad-request
+                title: Invalid Affiliate Key
+                type: https://developer.sumup.com/problem/invalid-affiliate-key
               schema:
                 $ref: '#/components/schemas/Problem'
           description: Response when given params (or one of them) are invalid
@@ -3931,11 +4007,19 @@ paths:
               schema:
                 $ref: '#/components/schemas/CreateReaderCheckoutUnprocessableEntity'
             application/problem+json:
-              example:
-                detail: Validation failed
-                status: 422
-                title: Unprocessable Entity
-                type: https://developer.sumup.com/problem/validation-error
+              examples:
+                PaymentMethodNotAllowed:
+                  value:
+                    detail: Payment method not allowed for this merchant.
+                    status: 422
+                    title: Payment Method Not Allowed
+                    type: https://developer.sumup.com/problem/payment-method-not-allowed
+                ValidationError:
+                  value:
+                    detail: Validation failed
+                    status: 422
+                    title: Unprocessable Content
+                    type: https://developer.sumup.com/problem/validation-error
               schema:
                 $ref: '#/components/schemas/Problem'
           description: Response when given params (or one of them) are invalid
@@ -4053,6 +4137,210 @@ paths:
         - readers.view
       x-scopes:
         - readers.read
+  /v0.1/merchants/{merchant_code}/readers/{reader_id}/settings:
+    get:
+      callbacks: {}
+      description: |
+        Returns the menu lock settings for a Solo reader.
+
+        For an online reader, returns the current settings. For an offline reader,
+        returns the last saved settings, which may differ from its current configuration.
+        Returns `404` if the reader is offline and no saved settings are available.
+
+        The response may include the menu lock PIN.
+      operationId: GetReaderSettings
+      parameters:
+        - description: The merchant code of the account that owns the reader.
+          example: MC0X0ABC
+          in: path
+          name: merchant_code
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the reader.
+          example: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+          in: path
+          name: reader_id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetReaderSettingsResponse'
+          description: Reader settings retrieved successfully.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsError'
+            application/problem+json:
+              example:
+                detail: Unauthorized
+                status: 401
+                title: Unauthorized
+                type: https://developer.sumup.com/problem/unauthorized
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+            application/problem+json:
+              example:
+                detail: The requested resource doesn't exist or does not belong to you.
+                status: 404
+                title: Requested resource couldn't be found.
+                type: https://developer.sumup.com/problem/not-found
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: The reader was not found, or it is offline and has no saved settings.
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsUnprocessableEntity'
+            application/problem+json:
+              example:
+                detail: Reader settings are only supported for Solo readers.
+                status: 422
+                title: Unsupported Device Model
+                type: https://developer.sumup.com/problem/unsupported-device-model
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: The reader model is not supported, or the reader could not return its settings.
+      security:
+        - apiKey: []
+        - oauth2:
+            - readers.read
+      summary: Get Reader Settings
+      tags:
+        - Readers
+      x-codegen:
+        method_name: get_reader_settings
+      x-permissions:
+        - readers.checkouts.view
+      x-scopes:
+        - readers.read
+    patch:
+      callbacks: {}
+      description: |
+        Updates the menu lock settings for a Solo reader. The reader must be online.
+        A successful response confirms that the reader applied the update.
+
+        Include at least one of `menu_lock.enabled` or `menu_lock.passcode`.
+        Omitted settings keep their current values. The response contains only the
+        settings included in the request.
+
+        When enabling menu lock for a reader without a PIN, include a four-digit PIN
+        in `menu_lock.passcode` in the same request.
+      operationId: UpdateReaderSettings
+      parameters:
+        - description: The merchant code of the account that owns the reader.
+          example: MC0X0ABC
+          in: path
+          name: merchant_code
+          required: true
+          schema:
+            type: string
+        - description: The unique identifier of the reader.
+          example: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+          in: path
+          name: reader_id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateReaderSettingsRequest'
+        description: Menu lock settings to update.
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsResponse'
+          description: Reader settings updated successfully.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsError'
+            application/problem+json:
+              example:
+                detail: Bad Request
+                status: 400
+                title: Bad Request
+                type: https://developer.sumup.com/problem/bad-request
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: The request body is malformed.
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsError'
+            application/problem+json:
+              example:
+                detail: Unauthorized
+                status: 401
+                title: Unauthorized
+                type: https://developer.sumup.com/problem/unauthorized
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: Unauthorized
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFound'
+            application/problem+json:
+              example:
+                detail: The requested resource doesn't exist or does not belong to you.
+                status: 404
+                title: Requested resource couldn't be found.
+                type: https://developer.sumup.com/problem/not-found
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: The reader was not found.
+        '422':
+          content:
+            application/json:
+              example:
+                errors:
+                  detail: The device is offline.
+                  type: READER_OFFLINE
+              schema:
+                $ref: '#/components/schemas/UpdateReaderSettingsUnprocessableEntity'
+            application/problem+json:
+              example:
+                detail: The device is offline.
+                status: 422
+                title: Reader Offline
+                type: https://developer.sumup.com/problem/reader-offline
+              schema:
+                $ref: '#/components/schemas/Problem'
+          description: The settings are invalid, the reader is offline, the reader model is not supported, or the reader could not apply the update.
+      security:
+        - apiKey: []
+        - oauth2:
+            - readers.write
+      summary: Update Reader Settings
+      tags:
+        - Readers
+      x-codegen:
+        method_name: update_reader_settings
+      x-permissions:
+        - readers.checkouts.create
+      x-scopes:
+        - readers.write
   /v0.1/merchants/{merchant_code}/readers/{reader_id}/terminate:
     post:
       callbacks: {}
@@ -4242,6 +4530,110 @@ paths:
         - readers.checkouts.view
       x-scopes:
         - readers.read
+  /v0.1/merchants/{merchant_code}/tokens:
+    post:
+      summary: Create a merchant token
+      description: |-
+        Creates a short-lived token for the merchant account identified by `merchant_code` and the requested actions.
+
+        Call this endpoint from your backend using a [supported authentication method](https://developer.sumup.com/api/authentication). You must have access to the merchant account. Before returning the token, check that the user signed in to your application is allowed to accept payments for that account.
+
+        Pass the returned `access_token` to the SDK. The token expires 15 minutes after creation; use `expires_in` for its remaining lifetime. To continue after it expires, create a new token through this endpoint.
+      operationId: CreateMerchantToken
+      tags:
+        - Tokens
+      security:
+        - apiKey: []
+        - oauth2: []
+      x-scopes: []
+      x-codegen:
+        method_name: create
+      x-permissions:
+        - relation: tokens.create
+          object_type: merchant
+          object_id_param: merchant_code
+      parameters:
+        - in: path
+          name: merchant_code
+          description: Unique code of the merchant account that will receive the payments.
+          required: true
+          schema:
+            type: string
+            example: MC0X0ABC
+      requestBody:
+        description: Actions the merchant token should allow.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - actions
+              properties:
+                actions:
+                  type: array
+                  description: Actions the token allows for this merchant account.
+                  minItems: 1
+                  uniqueItems: true
+                  items:
+                    type: string
+                    enum:
+                      - checkout
+                  example:
+                    - checkout
+            example:
+              actions:
+                - checkout
+      responses:
+        '200':
+          description: Merchant token created. Pass its access_token to the SDK.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+              example:
+                access_token: MERCHANT_TOKEN
+                token_type: Bearer
+                expires_in: 899
+        '400':
+          description: The request body is invalid or contains unsupported or duplicate actions.
+          content:
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: https://developer.sumup.com/problem/bad-request
+                title: Bad Request
+                status: 400
+                detail: The request contains an unsupported action.
+        '401':
+          description: Authentication is missing, invalid, or expired.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: https://developer.sumup.com/problem/unauthorized
+                title: Unauthorized
+                status: 401
+            application/problem+json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: https://developer.sumup.com/problem/unauthorized
+                title: Unauthorized
+                status: 401
+                detail: Token is invalid or expired.
+        '403':
+          description: The authenticated identity does not have permission to create tokens for this merchant account.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Problem'
+              example:
+                type: https://developer.sumup.com/problem/forbidden
+                title: Forbidden
+                status: 403
 components:
   schemas:
     AddressLegacy:
@@ -4789,6 +5181,27 @@ components:
           example: 831ff8d4cd5958ab5670
         personal_details:
           $ref: '#/components/schemas/PersonalDetails'
+    CustomerValidationError:
+      title: Customer Validation Error
+      description: Details of a customer validation error.
+      type: object
+      required:
+        - instance
+        - error_code
+        - error_message
+      properties:
+        instance:
+          type: string
+          description: Unique identifier of this error occurrence.
+          example: 32a44c6c-85d3-49e8-86bf-a5bba98c4621
+        error_code:
+          type: string
+          description: Platform code for the error.
+          example: INVALID
+        error_message:
+          type: string
+          description: Short description of the error.
+          example: customer_id
     Error:
       title: Error
       type: object
@@ -7325,6 +7738,24 @@ components:
       example: 4WLFDSBF
       minLength: 8
       maxLength: 9
+    UpdateReaderSettingsError:
+      description: Details of a failed reader settings request.
+      properties:
+        errors:
+          properties:
+            detail:
+              description: Error message
+              type: string
+            type:
+              description: Error code
+              type: string
+          required:
+            - detail
+          type: object
+      required:
+        - errors
+      title: UpdateReaderSettingsError
+      type: object
     CreateReaderCheckoutUnprocessableEntity:
       description: Unprocessable entity
       example:
@@ -7339,7 +7770,7 @@ components:
               return_url:
                 - must be a valid URL
               tip_rates:
-                - must be between 0.01 and 0.99
+                - has an invalid entry
               total_amount:
                 - must be greater than 0
         InstallmentsTooLow:
@@ -7348,6 +7779,12 @@ components:
             errors:
               installments:
                 - is invalid
+        PaymentMethodNotAllowed:
+          description: Error returned when the requested payment method is not supported for the merchant (e.g. pix for non-BR merchants).
+          value:
+            errors:
+              detail: Payment method not allowed for this merchant.
+              type: PAYMENT_METHOD_NOT_ALLOWED
         ReaderBusy:
           description: Error returned when a checkout was requested in the last 60 seconds.
           value:
@@ -7394,6 +7831,7 @@ components:
           client_transaction_id: 00e33a36-c99b-4cb2-b635-b90c1455c9c8
           created_at: 2026-07-07T20:41:16.315434Z
           installments: 1
+          payment_failure_reason:
           payment_status: pending
           payment_type: card
           reader_firmware_version: 3.3.3.21
@@ -7409,10 +7847,11 @@ components:
         data:
           properties:
             card_type:
-              description: Type of the card. Required for some countries
+              description: Type of the card, or null when no card type was specified.
               enum:
                 - credit
                 - debit
+                -
               type:
                 - string
                 - "null"
@@ -7433,12 +7872,12 @@ components:
                 - integer
                 - "null"
             payment_failure_reason:
-              description: Payment failure reason
+              description: Reason for the payment failure, or null when no failure reason is available.
               type:
                 - string
                 - "null"
             payment_status:
-              description: Payment status from payments v2 event
+              description: Status of the payment, or null when no payment status is available.
               type:
                 - string
                 - "null"
@@ -7515,6 +7954,7 @@ components:
             - reader_firmware_version
             - installments
             - payment_status
+            - payment_failure_reason
             - valid_until
             - created_at
             - updated_at
@@ -7524,6 +7964,52 @@ components:
       required:
         - data
       title: GetReaderCheckoutResponse
+      type: object
+    GetReaderSettingsResponse:
+      description: |
+        Menu lock settings reported by the reader, or the last saved settings when offline.
+      example:
+        data:
+          menu_lock:
+            enabled: true
+            passcode: '1234'
+      properties:
+        data:
+          properties:
+            menu_lock:
+              description: Menu lock configuration. Fields may be absent if no value is available.
+              properties:
+                enabled:
+                  description: Whether menu lock is enabled.
+                  example: true
+                  type: boolean
+                passcode:
+                  description: Four-digit PIN used to unlock the reader's menu.
+                  example: '1234'
+                  format: password
+                  pattern: ^[0-9]{4}$
+                  type: string
+              type: object
+          required:
+            - menu_lock
+          type: object
+      required:
+        - data
+      title: GetReaderSettingsResponse
+      type: object
+    UpdateReaderSettingsUnprocessableEntity:
+      description: The reader cannot complete the settings request, or the settings are invalid.
+      example:
+        errors:
+          detail: Reader settings are only supported for Solo readers.
+          type: UNSUPPORTED_DEVICE_MODEL
+      properties:
+        errors:
+          additionalProperties: true
+          type: object
+      required:
+        - errors
+      title: UpdateReaderSettingsUnprocessableEntity
       type: object
     StatusResponse:
       description: Status of a device
@@ -7646,6 +8132,8 @@ components:
             type:
               description: Key indicating type of error
               enum:
+                - INVALID_AFFILIATE_KEY
+                - APP_OUTDATED
                 - INVALID_BEARER_TOKEN
                 - INVALID_USER_AGENT
                 - NOT_ENOUGH_UNPAID_PAYOUTS
@@ -7673,9 +8161,8 @@ components:
               type: string
             client_transaction_id:
               description: |
-                The client transaction ID is a unique identifier for the transaction that is generated for the client.
-
-                It can be used later to fetch the transaction details via the [Transactions API](https://developer.sumup.com/api/transactions/get).
+                Unique identifier for the transaction associated with this checkout.
+                Use this value to match the checkout with payment events and transaction records.
               example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
               type: string
           required:
@@ -7684,6 +8171,71 @@ components:
       required:
         - data
       title: CreateReaderCheckoutResponse
+      type: object
+    UpdateReaderSettingsRequest:
+      description: Menu lock settings to update for a Solo reader.
+      example:
+        menu_lock:
+          enabled: true
+          passcode: '1234'
+      properties:
+        menu_lock:
+          description: Menu lock configuration. Provide at least one of `enabled` or `passcode`.
+          minProperties: 1
+          properties:
+            enabled:
+              description: Whether menu lock is enabled.
+              example: true
+              type: boolean
+            passcode:
+              description: Four-digit PIN used to unlock the reader's menu.
+              example: '1234'
+              format: password
+              pattern: ^[0-9]{4}$
+              type: string
+          type: object
+      required:
+        - menu_lock
+      title: UpdateReaderSettingsRequest
+      type: object
+    UpdateReaderSettingsResponse:
+      description: Menu lock settings applied to the reader.
+      example:
+        data:
+          menu_lock:
+            enabled: true
+            passcode: '1234'
+          status: applied
+      properties:
+        data:
+          properties:
+            menu_lock:
+              description: Settings included in the update. Omitted fields are not returned.
+              properties:
+                enabled:
+                  description: Whether menu lock is enabled.
+                  example: true
+                  type: boolean
+                passcode:
+                  description: Four-digit PIN used to unlock the reader's menu.
+                  example: '1234'
+                  format: password
+                  pattern: ^[0-9]{4}$
+                  type: string
+              type: object
+            status:
+              description: Indicates that the reader applied the settings update.
+              enum:
+                - applied
+              example: applied
+              type: string
+          required:
+            - status
+            - menu_lock
+          type: object
+      required:
+        - data
+      title: UpdateReaderSettingsResponse
       type: object
     Unauthorized:
       description: 401 Unauthorized
@@ -7710,7 +8262,8 @@ components:
       title: Unauthorized
       type: object
     CreateReaderCheckoutRequest:
-      description: Reader Checkout
+      description: |
+        Payment details for a Reader Checkout.
       example:
         aade:
           provider_id: '123'
@@ -7720,7 +8273,9 @@ components:
           app_id: com.example.app
           foreign_transaction_id: '123456'
           key: ef7b684a-d6f4-4e93-9b1b-6acdd6564a8e
-          tags: {}
+          tags:
+            custom_key_1: custom_value_1
+            custom_key_2: custom_value_2
         card_type: debit
         description: This is a description...
         installments: 1
@@ -7759,33 +8314,31 @@ components:
           type: object
         affiliate:
           description: |
-            Affiliate metadata for the transaction.
-            It is a field that allow for integrators to track the source of the transaction.
+            Optional affiliate metadata associated with the checkout's payment.
+            Provide both `app_id` and `key` when including this object.
           properties:
             app_id:
               description: |
-                Application ID of the affiliate.
-                It is a unique identifier for the application and should be set by the integrator in the [Affiliate Keys](https://developer.sumup.com/affiliate-keys) page.
+                Integrator application identifier from the [Affiliate Keys](https://developer.sumup.com/affiliate-keys) page.
+                Required when the affiliate object is provided.
               example: com.example.app
               type: string
             foreign_transaction_id:
               description: |
-                Foreign transaction ID of the affiliate.
-                It is a unique identifier for the transaction.
-                It can be used later to fetch the transaction details via the [Transactions API](https://developer.sumup.com/api/transactions/get).
+                Integrator-owned transaction reference. Optional.
+                Can be used to retrieve the transaction via the [Transactions API](https://developer.sumup.com/api/transactions/get).
               example: 19e12390-72cf-4f9f-80b5-b0c8a67fa43f
               type: string
             key:
               description: |
-                Key of the affiliate.
-                It is a unique identifier for the key  and should be generated by the integrator in the [Affiliate Keys](https://developer.sumup.com/affiliate-keys) page.
+                Affiliate key generated in the [Affiliate Keys](https://developer.sumup.com/affiliate-keys) page.
+                Required when the affiliate object is provided.
               example: 123e4567-e89b-12d3-a456-426614174000
               type: string
             tags:
               additionalProperties: true
               description: |
-                Additional metadata for the transaction.
-                It is key-value object that can be associated with the transaction.
+                Optional key-value metadata associated with the transaction.
               example:
                 custom_key_1: custom_value_1
                 custom_key_2: custom_value_2
@@ -7793,7 +8346,6 @@ components:
           required:
             - app_id
             - key
-            - foreign_transaction_id
           title: Affiliate
           type:
             - object
@@ -7801,7 +8353,7 @@ components:
         card_type:
           description: |
             The card type of the card used for the transaction.
-            Is is required only for some countries (e.g: Brazil).
+            It is required only for some countries (e.g: Brazil).
           enum:
             - credit
             - debit
@@ -7816,13 +8368,25 @@ components:
             It may vary according to the merchant country.
             For example, in Brazil, the maximum number of installments is 12.
 
-            Omit if the merchant country does support installments.
+            Omit if the merchant country does not support installments.
             Otherwise, the checkout will be rejected.
           example: 1
           minimum: 1
           type:
             - integer
             - "null"
+        payment_type:
+          default: card
+          description: |
+            The payment method type for the transaction. Defaults to `card`.
+
+            Use `pix` to initiate a Pix QR-code payment flow on the device.
+            Pix is only supported for Brazilian merchants; other merchants will receive a 422 error.
+          enum:
+            - card
+            - pix
+          example: card
+          type: string
         return_url:
           description: |
             Webhook URL to which the payment result will be sent.
@@ -7832,14 +8396,19 @@ components:
           type: string
         tip_rates:
           description: |
-            List of tipping rates to be displayed to the cardholder.
-            The rates are in percentage and should be between 0.01 and 0.99.
-            The list should be sorted in ascending order.
+            Exactly three distinct tipping rates to be displayed to the cardholder.
+            Each rate is a fraction between 0.01 and 1.00 in increments of 0.01.
+            The rates are sorted in ascending order by the server.
           items:
             format: float
+            maximum: 1
+            minimum: 0.01
             multipleOf: 0.01
             type: number
+          maxItems: 3
+          minItems: 3
           type: array
+          uniqueItems: true
         tip_timeout:
           default: 30
           description: |
@@ -7963,6 +8532,29 @@ components:
         - errors
       title: NotFound
       type: object
+    Token:
+      type: object
+      description: A short-lived credential for the requested merchant account and actions. Pass access_token to a SumUp SDK that supports merchant tokens.
+      required:
+        - access_token
+        - token_type
+        - expires_in
+      properties:
+        access_token:
+          type: string
+          description: Secret token to pass to the SDK. Treat this value as an opaque string; do not parse it or depend on its format.
+          example: MERCHANT_TOKEN
+        token_type:
+          type: string
+          description: Authentication scheme used by the token. Always Bearer.
+          enum:
+            - Bearer
+          example: Bearer
+        expires_in:
+          type: integer
+          description: Remaining lifetime of the token in seconds when the response is created. Tokens expire 15 minutes after creation. Request a new token when needed.
+          minimum: 0
+          example: 899
   requestBodies:
     CheckoutCreate:
       required: true
@@ -8012,6 +8604,18 @@ components:
                 description: A sample checkout
                 hosted_checkout:
                   enabled: true
+                redirect_url: https://example.com/orders/123/complete
+            Tokenization:
+              summary: Save a customer card
+              description: Create a checkout to collect consent and save a card through the Payment Widget.
+              value:
+                checkout_reference: save-card-123
+                amount: 1
+                currency: EUR
+                merchant_code: MCXXXXXX
+                description: Save a card for future payments
+                customer_id: 831ff8d4cd5958ab5670
+                purpose: SETUP_RECURRING_PAYMENT
     CheckoutUpdate:
       required: true
       description: Details for updating a checkout resource.
@@ -8047,8 +8651,6 @@ components:
       description: Optional amount for partial refunds.
       content:
         application/json:
-          example:
-            amount: 5
           schema:
             type: object
             description: Optional amount for partial refunds of transactions.
@@ -8056,9 +8658,16 @@ components:
               amount:
                 type: number
                 format: float
-                description: |-
-                  Amount to refund in major units of the transaction's currency, for example `5` for EUR 5.00. It must be greater than zero and cannot exceed the amount eligible for a refund. Eligibility depends on the transaction and country/currency rules. If omitted, the system requests a full refund.
+                description: Amount to refund in major units of the transaction's currency, for example `5` for EUR 5.00. It must be greater than zero and cannot exceed the amount eligible for a refund. Eligibility depends on the transaction and country/currency rules. If omitted, the system requests a full refund.
                 example: 5
+          examples:
+            FullRefund:
+              summary: Full refund
+              value: {}
+            PartialRefund:
+              summary: Partial refund
+              value:
+                amount: 24.42
   responses:
     Checkout:
       description: Returns the created checkout resource.
@@ -8176,6 +8785,20 @@ components:
                   enabled: true
                 hosted_checkout_url: https://checkout.sumup.com/pay/8f9316a3-cda9-42a9-9771-54d534315676
                 transactions: []
+            Tokenization:
+              summary: Checkout for saving a card
+              value:
+                checkout_reference: save-card-123
+                amount: 1
+                currency: EUR
+                merchant_code: MCXXXXXX
+                description: Save a card for future payments
+                customer_id: 831ff8d4cd5958ab5670
+                purpose: SETUP_RECURRING_PAYMENT
+                id: 7164c99b-13cb-42a1-8ba1-3c2c46a29de7
+                status: PENDING
+                date: '2026-10-30T12:00:00+00:00'
+                transactions: []
     CheckoutUpdate:
       description: Returns the updated checkout resource.
       content:
@@ -8218,17 +8841,55 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/CheckoutSuccess'
-          example:
-            checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
-            amount: 10.1
-            currency: EUR
-            merchant_code: MH4H92C7
-            description: Purchase
-            id: 4e425463-3e1b-431d-83fa-1e51c2925e99
-            status: PENDING
-            date: '2020-02-29T10:56:56+00:00'
-            transaction_code: TEENSK4W2K
-            transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+          examples:
+            Checkout:
+              value:
+                checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
+                amount: 10.1
+                currency: EUR
+                merchant_code: MH4H92C7
+                description: Purchase
+                id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+                status: PENDING
+                date: '2020-02-29T10:56:56+00:00'
+                transaction_code: TEENSK4W2K
+                transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+            PaidCheckout:
+              summary: Paid checkout with a transaction to refund
+              value:
+                checkout_reference: f00a8f74-b05d-4605-bd73-2a901bae5802
+                amount: 42.42
+                currency: EUR
+                merchant_code: MH4H92C7
+                description: Purchase
+                id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+                status: PAID
+                date: '2020-02-29T10:56:56+00:00'
+                transaction_code: TEENSK4W2K
+                transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+                transactions:
+                  - id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+                    transaction_code: TEENSK4W2K
+                    amount: 42.42
+                    currency: EUR
+                    status: SUCCESSFUL
+                    timestamp: '2026-10-30T12:00:00+00:00'
+            TokenizedCheckout:
+              summary: Checkout with a saved card
+              value:
+                checkout_reference: save-card-123
+                amount: 1
+                currency: EUR
+                merchant_code: MCXXXXXX
+                description: Save a card for future payments
+                customer_id: 831ff8d4cd5958ab5670
+                purpose: SETUP_RECURRING_PAYMENT
+                id: 7164c99b-13cb-42a1-8ba1-3c2c46a29de7
+                status: PAID
+                date: '2026-10-30T12:00:00+00:00'
+                transactions: []
+                payment_instrument:
+                  token: 6878cb7f-6515-47bf-bdd9-1408d270fdce
     CheckoutProcessAccepted:
       description: Returns the next required action for asynchronous checkout processing.
       content:
