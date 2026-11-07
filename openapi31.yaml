@@ -8105,19 +8105,15 @@ components:
           allOf:
             - $ref: '#/components/schemas/Amount'
         gross_amount:
-          description: 'Gross amount after applying the tax.
-
+          description: |
+            Gross amount after applying the tax.
             The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
           allOf:
             - $ref: '#/components/schemas/Amount'
         tax_amount:
-          description: 'Amount of tax.
-
+          description: |
+            Amount of tax.
             The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
           allOf:
             - $ref: '#/components/schemas/Amount'
     DiscountLevel:
@@ -8190,13 +8186,10 @@ components:
       type:
         - string
         - "null"
-      description: 'The method used to target items to discount.
-
+      description: |
+        The method used to target items to discount.
         Must be populated for ITEM level discounts, and must be null for CART level discounts (CART level targets all
-
         items, therefore none of these categories apply).
-
-'
       enum:
         - ITEM
         - CATEGORY
@@ -8307,13 +8300,10 @@ components:
             - "null"
           format: int64
           minimum: 1
-          description: 'The number of points used for this loyalty discount.
-
+          description: |
+            The number of points used for this loyalty discount.
             Must be a positive integer if the scheme type is POINTS.
-
             Must not be populated if the scheme type is STAMPS.
-
-'
           example: 50
         name:
           type: string
@@ -8357,29 +8347,22 @@ components:
         - percentage.'
       properties:
         absolute:
-          description: 'The absolute value in minor units of the currency according to the Sale.currency.scale.
-
+          description: |
+            The absolute value in minor units of the currency according to the Sale.currency.scale.
             Example: 10000 = 10.00
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
         percentage:
           type: integer
           format: int64
           minimum: 0
-          description: 'The percentage in minor units (1/100000).
-
+          description: |
+            The percentage in minor units (1/100000).
 
             Examples:
-
             - 10% -> 0.10 (decimal) = 10000 (minor units)
-
             - 15.5% -> 0.155 (decimal) = 15500 (minor units)
-
             - 0.001% -> 0.00001 (decimal) = 1 (minor units)
-
-'
           example: 10000
     DiscountLine:
       type: object
@@ -8409,27 +8392,21 @@ components:
         value:
           $ref: '#/components/schemas/DiscountValue'
         net_amount:
-          description: 'The net amount of the discount.
-
+          description: |
+            The net amount of the discount.
             The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
         gross_amount:
-          description: 'The gross amount of the discount.
-
+          description: |
+            The gross amount of the discount.
             The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
         tax_amount:
-          description: 'The tax amount of the discount.
-
+          description: |
+            The tax amount of the discount.
             The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
     LineItemPriceV10:
@@ -8455,11 +8432,9 @@ components:
         - taxes_final
       properties:
         unit_amount:
-          description: 'The price of a single unit. If the tax_mode is GROSS it includes taxes,
-
+          description: |
+            The price of a single unit. If the tax_mode is GROSS it includes taxes,
             otherwise no tax is included. It does NOT include discounts.
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
           example: 300
@@ -8488,11 +8463,9 @@ components:
         discounts:
           type: array
           maxItems: 1000
-          description: 'Discounts applied. Discount amounts do not affect `total_net_amount` /
-
+          description: |
+            Discounts applied. Discount amounts do not affect `total_net_amount` /
             `total_gross_amount`; they are reflected in the `*_final` amounts.
-
-'
           items:
             $ref: '#/components/schemas/DiscountLine'
           example: []
@@ -8544,13 +8517,10 @@ components:
         - total_gross_amount
       properties:
         unit_amount:
-          description: 'The price of a single unit.
-
+          description: |
+            The price of a single unit.
             If the tax_mode is GROSS, it includes taxes, otherwise no tax included.
-
-            It doesn''t include discounts.
-
-'
+            It doesn't include discounts.
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
         total_net_amount:
@@ -8582,19 +8552,15 @@ components:
               allOf:
                 - $ref: '#/components/schemas/PositiveAmount'
             gross_amount:
-              description: 'Gross amount after applying the tax.
-
+              description: |
+                Gross amount after applying the tax.
                 The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
               allOf:
                 - $ref: '#/components/schemas/PositiveAmount'
             tax_amount:
-              description: 'Amount of tax.
-
+              description: |
+                Amount of tax.
                 The value of the amount in minor units of the currency according to the Sale.currency.scale.
-
-'
               allOf:
                 - $ref: '#/components/schemas/PositiveAmount'
     PositivePriceWithTaxes:
@@ -8638,11 +8604,9 @@ components:
           type: array
           minItems: 1
           maxItems: 1000
-          description: 'Taxes applied on top of `total_net_amount_final` amount resulting in `total_gross_amount_final` amount.
-
+          description: |
+            Taxes applied on top of `total_net_amount_final` amount resulting in `total_gross_amount_final` amount.
             If no discounts are applied, it should be equal to `taxes`.
-
-'
           items:
             $ref: '#/components/schemas/PositiveTaxLine'
     ModifierSet:
@@ -8821,11 +8785,9 @@ components:
           $ref: '#/components/schemas/LineItemPriceV10'
         categories:
           type: array
-          description: 'Categories the line belongs to. A shared optional structure available to any
-
+          description: |
+            Categories the line belongs to. A shared optional structure available to any
             line; not a per-type field.
-
-'
           maxItems: 1000
           items:
             $ref: '#/components/schemas/CategoryV10'
@@ -8834,11 +8796,9 @@ components:
               name: Hot Drinks
         modifiers:
           type: array
-          description: 'Modifiers customise a line (e.g. "oat milk" on a cappuccino). A shared
-
+          description: |
+            Modifiers customise a line (e.g. "oat milk" on a cappuccino). A shared
             optional structure available to any line; not a per-type field.
-
-'
           maxItems: 50
           items:
             $ref: '#/components/schemas/ModifierItem'
@@ -8847,11 +8807,9 @@ components:
           $ref: '#/components/schemas/ItemReferencesV10'
         features:
           type: array
-          description: 'Named, typed, type-specific data. New item types add their data here as
-
+          description: |
+            Named, typed, type-specific data. New item types add their data here as
             features instead of new schema variants. See `Feature` for per-type examples.
-
-'
           maxItems: 100
           items:
             $ref: '#/components/schemas/FeatureV10'
@@ -8919,19 +8877,13 @@ components:
               tax_amount: 148
     TaxMode:
       type: string
-      description: 'The tax mode used by merchant for displaying prices and calculating taxes:
-
-        - NO_TAX: The prices don''t contain any taxes, merchant don''t report taxes
-
+      description: |
+        The tax mode used by merchant for displaying prices and calculating taxes:
+        - NO_TAX: The prices don't contain any taxes, merchant don't report taxes
         - GROSS: The prices used by merchant already include taxes (common in EU), the tax is calculated from the gross price
-
-        - NET: The prices used by merchant don''t include taxes (common in US), the tax is calculated from the net price
-
+        - NET: The prices used by merchant don't include taxes (common in US), the tax is calculated from the net price
         Since tax values can be different for the same net price depending if the tax
-
         was calculated from gross or net price, this info is necessary to be able to reconcile tax calculations.
-
-'
       enum:
         - NO_TAX
         - GROSS
@@ -8958,13 +8910,10 @@ components:
           $ref: '#/components/schemas/SalesChannel'
         sub_channel:
           type: string
-          description: 'The sub_channel is an optional field that can be used to provide more
-
+          description: |
+            The sub_channel is an optional field that can be used to provide more
             information about the sale_channel. For example, if the sale_channel is
-
             ONLINE_PAYMENTS, the sub_channel could be "WIX" or "QR_CODE" or "WOOCOMMERCE".
-
-'
           example: QR_CODE
           maxLength: 50
         external_id:
@@ -8974,13 +8923,10 @@ components:
           maxLength: 250
         external_sub_channel_id:
           type: string
-          description: 'An external reference ID for the sub-channel.
-
+          description: |
+            An external reference ID for the sub-channel.
             For example, when channel is BOOKINGS and sub_channel is POS,
-
             this can hold the OMS order ID while external_id holds the appointment ID.
-
-'
           example: 9736e947-6f1f-487f-846a-c5954fb06a5a
           maxLength: 250
       required:
@@ -9075,26 +9021,18 @@ components:
         type:
           type: string
           default: purchase
-          description: 'Payment operation type.
-
+          description: |
+            Payment operation type.
             This is distinct from the payment instrument in `method`.
-
             Input is case-insensitive; the canonical form is lowercase snake_case.
-
             **VALUES**: [purchase, unreferenced_refund]
-
             Defaults to "purchase" if unspecified. Either a normal purchase or an unreferenced refund for negative
-
             sales like deposit returns.
-
-'
           example: purchase
         amount:
-          description: 'The amount of the payment including tips.
-
+          description: |
+            The amount of the payment including tips.
             The value of the amount in minor units of `Sale.currency`.
-
-'
           allOf:
             - $ref: '#/components/schemas/PositiveAmount'
           example: 975
@@ -9180,11 +9118,9 @@ components:
           type: array
           minItems: 1
           maxItems: 1000
-          description: 'The lines sold in this sale, in the order they were added to the cart.
-
+          description: |
+            The lines sold in this sale, in the order they were added to the cart.
             Includes merchant fees (`type: "FEE"`) when present; fee details are in `features`.
-
-'
           items:
             $ref: '#/components/schemas/SaleLineItemV10'
         price:
@@ -9196,9 +9132,8 @@ components:
         payments:
           type: array
           maxItems: 1000
-          description: 'Payments on this sale, in the order they were recorded.
-
-'
+          description: |
+            Payments on this sale, in the order they were recorded.
           items:
             $ref: '#/components/schemas/PublicPaymentV10'
           example:
@@ -9245,12 +9180,10 @@ components:
           example: 66bcbtzelrubzeuzruzgu76678trncH
     ProblemV10:
       type: object
-      description: 'A RFC 9457 problem details object.
-
+      description: |
+        A RFC 9457 problem details object.
 
         Additional properties specific to the problem type may be present.
-
-'
       required:
         - type
       additionalProperties: true
@@ -11008,6 +10941,68 @@ components:
       description: >-
         Delete the reader.
 webhooks:
+  sales.completed:
+    post:
+      operationId: SaleCompletedWebhook
+      tags:
+        - Sales
+      summary: Sale completed
+      description: >-
+        Sent once per sale when its completion is observed: the sale is closed and has been fully paid. The event created_at is the sale's recorded completion time, rather than the time the notification is delivered. A delayed notification may arrive after subsequent updates, refunds, or chargebacks. Fetch the current sale using object.url with an access token that has the sales.read scope. The sale may briefly be unavailable while the Sales API catches up; retry fetching it after a 404 response. Automatic retries and manual redelivery may deliver the same event more than once; deduplicate by event id.
+      x-object-type: sale
+      x-object:
+        $ref: "#/components/schemas/Sale"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+            examples:
+              completed:
+                summary: A sale completed webhook event.
+                value:
+                  id: event_01JQCG7EF8F2DA02V31HSEXXCM
+                  type: sales.completed
+                  created_at: "2026-10-14T12:00:00Z"
+                  object:
+                    id: 847ed267-c617-4d38-9e5a-4ef728daa5c3
+                    type: sale
+                    url: https://api.sumup.com/v1.0/merchants/MC0DE/sales/847ed267-c617-4d38-9e5a-4ef728daa5c3
+      responses:
+        "2XX":
+          description: Return any 2xx response to acknowledge successful delivery.
+  sales.updated:
+    post:
+      operationId: SaleUpdatedWebhook
+      tags:
+        - Sales
+      summary: Sale updated
+      description: >-
+        Sent when a closed, fully paid sale is published or updated, including subsequent refunds and chargebacks. The first notification can occur when the sale becomes fully paid and closed. Fetch the current sale using object.url with an access token that has the sales.read scope. The sale may briefly be unavailable while the Sales API catches up; retry fetching it after a 404 response. Notifications contain the sale identity rather than a snapshot, and delivery order is not guaranteed.
+      x-object-type: sale
+      x-object:
+        $ref: "#/components/schemas/Sale"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Event'
+            examples:
+              updated:
+                summary: A sale updated webhook event.
+                value:
+                  id: event_01JQCG7EF8F2DA02V31HSEXXCM
+                  type: sales.updated
+                  created_at: "2026-10-14T12:00:00Z"
+                  object:
+                    id: 847ed267-c617-4d38-9e5a-4ef728daa5c3
+                    type: sale
+                    url: https://api.sumup.com/v1.0/merchants/MC0DE/sales/847ed267-c617-4d38-9e5a-4ef728daa5c3
+      responses:
+        "2XX":
+          description: Return any 2xx response to acknowledge successful delivery.
   checkouts.created:
     post:
       operationId: CheckoutCreatedWebhook
