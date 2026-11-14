@@ -1,0 +1,238 @@
+meta {
+  name: Get a Reader Checkout
+  type: http
+  seq: 12
+  tags: [
+    Readers
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Merchant Code')
+  merchant_code: MC0X0ABC
+  @description('The unique identifier of the Reader')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+  @description('The unique identifier of the Checkout')
+  checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+}
+
+docs {
+  Get a Checkout for a Reader.
+  
+}
+
+example {
+  name: 200 Response
+  description: The Checkout got successfully retrieved for the given reader.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+      checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "card_type": "credit",
+            "checkout_id": "00e33a36-c99b-4cb2-b635-b90c1455c9c8",
+            "client_transaction_id": "00e33a36-c99b-4cb2-b635-b90c1455c9c8",
+            "created_at": "2026-07-07T20:41:16.315434Z",
+            "installments": 1,
+            "payment_failure_reason": null,
+            "payment_status": "pending",
+            "payment_type": "card",
+            "reader_firmware_version": "3.3.3.21",
+            "reader_serial_number": "1234567890",
+            "status": "pending",
+            "total_amount": {
+              "currency": "EUR",
+              "minor_unit": 2,
+              "value": 10000
+            },
+            "updated_at": "2026-07-07T20:42:18.117244Z",
+            "valid_until": "2026-07-07T20:41:16.315434Z"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+      checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+      checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized",
+          "status": 401,
+          "title": "Unauthorized",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader or checkout is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+      checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Not Found"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader or checkout is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/checkout/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+      checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "status": 404,
+          "title": "Requested resource couldn't be found.",
+          "type": "https://developer.sumup.com/problem/not-found"
+        }
+      '''
+    }
+  }
+}

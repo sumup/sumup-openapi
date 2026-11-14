@@ -1,0 +1,176 @@
+meta {
+  name: Create an Apple Pay session
+  type: http
+  seq: 8
+  tags: [
+    Checkouts
+  ]
+}
+
+put {
+  url: {{baseUrl}}/v0.2/checkouts/:checkout_id/apple-pay-session
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('SumUp-generated `id` returned when creating a checkout. Use this value to retrieve, update, process, or deactivate the checkout.')
+  checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+}
+
+body:json {
+  {
+    "context": "example.com",
+    "target": "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession"
+  }
+}
+
+docs {
+  Creates an Apple Pay merchant session for the specified checkout.
+  
+  Use this endpoint after the customer selects Apple Pay and before calling
+  `ApplePaySession.completeMerchantValidation(...)` in the browser.
+  SumUp validates the merchant session request and returns the Apple Pay
+  session object that your frontend should pass to Apple's JavaScript API.
+  
+}
+
+example {
+  name: 200 Response
+  description: '''
+    Successful request. Returns the Apple Pay merchant session object
+    that should be forwarded to the Apple Pay JS SDK to complete merchant
+    validation and continue the payment flow.
+    
+  '''
+  
+  request: {
+    url: {{baseUrl}}/v0.2/checkouts/:checkout_id/apple-pay-session
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "context": "example.com",
+        "target": "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "displayName": "Test Account",
+          "domainName": "pay.sumup.com",
+          "epochTimestamp": 1775323532665,
+          "expiresAt": 1775327132665,
+          "merchantIdentifier": "7801D328E6637EFC1ADE6CE01C671D2CD318E32CA4ED1F9FC390D170D827D9AB",
+          "merchantSessionIdentifier": "SSH92CC412E5FCF4FAB88684914C953C0D4_916523AAED1343F5BC5815E12BEE9250AFFDC1A17C46B0DE5A943F0F94927C24",
+          "nonce": "a968a2bf",
+          "operationalAnalyticsIdentifier": "Test Account:7801D328E6637EFC1ADE6CE01C671D2CD318E32CA4ED1F9FC390D170D827D9AB",
+          "pspId": "7801D328E6637EFC1ADE6CE01C671D2CD318E32CA4ED1F9FC390D170D827D9AB",
+          "retries": 0,
+          "signature": "<apple-pay-signature>"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Bad Request
+  
+  request: {
+    url: {{baseUrl}}/v0.2/checkouts/:checkout_id/apple-pay-session
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "context": "example.com",
+        "target": "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "INVALID",
+          "message": "Bad Request"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.2/checkouts/:checkout_id/apple-pay-session
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "context": "example.com",
+        "target": "https://apple-pay-gateway-cert.apple.com/paymentservices/startSession"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

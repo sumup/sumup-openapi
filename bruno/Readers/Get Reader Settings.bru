@@ -1,0 +1,299 @@
+meta {
+  name: Get Reader Settings
+  type: http
+  seq: 9
+  tags: [
+    Readers
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('The merchant code of the account that owns the reader.')
+  merchant_code: MC0X0ABC
+  @description('The unique identifier of the reader.')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+docs {
+  Returns the menu lock settings for a Solo reader.
+  
+  For an online reader, returns the current settings. For an offline reader,
+  returns the last saved settings, which may differ from its current configuration.
+  Returns `404` if the reader is offline and no saved settings are available.
+  
+  The response may include the menu lock PIN.
+  
+}
+
+example {
+  name: 200 Response
+  description: Reader settings retrieved successfully.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "menu_lock": {
+              "enabled": true,
+              "passcode": "1234"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized",
+          "status": 401,
+          "title": "Unauthorized",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The reader was not found, or it is offline and has no saved settings.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Not Found"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The reader was not found, or it is offline and has no saved settings.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "status": 404,
+          "title": "Requested resource couldn't be found.",
+          "type": "https://developer.sumup.com/problem/not-found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: The reader model is not supported, the firmware version is unsupported, or the reader could not return its settings.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Reader settings are only supported for Solo readers.",
+            "type": "UNSUPPORTED_DEVICE_MODEL"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: The reader model is not supported, the firmware version is unsupported, or the reader could not return its settings.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Reader settings are only supported for Solo readers.",
+          "status": 422,
+          "title": "Unsupported Device Model",
+          "type": "https://developer.sumup.com/problem/unsupported-device-model"
+        }
+      '''
+    }
+  }
+}

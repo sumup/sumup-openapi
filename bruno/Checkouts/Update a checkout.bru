@@ -1,0 +1,187 @@
+meta {
+  name: Update a checkout
+  type: http
+  seq: 5
+  tags: [
+    Checkouts
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('SumUp-generated `id` returned when creating a checkout. Use this value to retrieve, update, process, or deactivate the checkout.')
+  checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+}
+
+body:json {
+  {
+    "amount": 12.5,
+    "currency": "EUR",
+    "description": "Updated purchase",
+    "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+    "valid_until": "2030-12-31T23:59:59Z",
+    "customer_id": "831ff8d4cd5958ab5670"
+  }
+}
+
+docs {
+  Updates the amount, currency, description, reference, expiration, or customer associated with an existing checkout. Only the supplied fields are updated.
+  
+  This request changes the checkout details; it does not charge a payment instrument. Process the checkout separately to attempt a payment.
+}
+
+example {
+  name: 200 Response
+  description: Returns the updated checkout resource.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PATCH
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "amount": 12.5,
+        "currency": "EUR",
+        "description": "Updated purchase",
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 12.5,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "merchant_country": "DE",
+          "description": "Updated purchase",
+          "id": "88fcf8de-304d-4820-8f1c-ec880290eb92",
+          "status": "PENDING",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "transactions": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PATCH
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "amount": 12.5,
+        "currency": "EUR",
+        "description": "Updated purchase",
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PATCH
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "amount": 12.5,
+        "currency": "EUR",
+        "description": "Updated purchase",
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

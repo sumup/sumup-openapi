@@ -1,0 +1,353 @@
+meta {
+  name: List sales
+  type: http
+  seq: 1
+  tags: [
+    Sales
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Maximum number of results per page.')
+  pagination_limit: 10
+  @description('''
+    Opaque token from the previous list response. Omit it on the first request. To load
+    the next page, pass the returned token unchanged. Not interchangeable with tokens
+    from `POST /sales/search`.
+  ''')
+  ~pagination_token: 
+}
+
+params:path {
+  @description('The merchant code.')
+  merchant_code: MCZM9TGQ
+}
+
+docs {
+  Returns a paginated list of `Sale` objects. Results are sorted **newest first** by the
+  **newest event** recorded for each sale. Pagination tokens follow that order.
+  
+  Covers the merchant’s **last two years** of sales. Non-finalised sales are never returned;
+  only fully-paid sales. Use `POST /sales/search` for filtered queries.
+}
+
+example {
+  name: 200 Response
+  description: Successful response with a page of sales.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+    method: GET
+    mode: none
+    params:query: {
+      ~pagination_token: 
+      pagination_limit: 10
+    }
+  
+    params:path: {
+      merchant_code: MCZM9TGQ
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "items": [
+            {
+              "id": "dbe3178d-4b83-5024-9b26-9b8e1b280514",
+              "user_id": "d6f51684-519b-454c-bdb3-deeb05f52b92",
+              "currency": {
+                "code": "EUR",
+                "scale": 2
+              },
+              "name": "Order 1234",
+              "note": "Please deliver to the back door.",
+              "items": [
+                {
+                  "id": "line-1",
+                  "type": "CATALOG",
+                  "name": "Cappuccino",
+                  "quantity": 2.15332,
+                  "unit_of_measure": {
+                    "group_id": "weight",
+                    "unit_id": "weight.kilogram",
+                    "unit_ratio": 1.24412
+                  },
+                  "service_type": "IN_HOUSE",
+                  "note": "extra hot",
+                  "price": {
+                    "unit_amount": 300,
+                    "total_net_amount": 252,
+                    "total_gross_amount": 300,
+                    "taxes": [
+                      {
+                        "id": "tax-vat-19",
+                        "net_amount": 252,
+                        "gross_amount": 300,
+                        "tax_amount": 48
+                      }
+                    ],
+                    "discounts": [],
+                    "total_net_amount_final": 210,
+                    "total_gross_amount_final": 250,
+                    "taxes_final": [
+                      {
+                        "id": "tax-vat-19",
+                        "net_amount": 210,
+                        "gross_amount": 250,
+                        "tax_amount": 40
+                      }
+                    ]
+                  },
+                  "categories": [
+                    {
+                      "id": "cat-hot-drinks",
+                      "name": "Hot Drinks"
+                    }
+                  ],
+                  "modifiers": [],
+                  "references": {
+                    "catalog_source": "SUMUP",
+                    "catalog_reference": "urn:sumup:pos:variant:MCGLE7VC:9736e947-6f1f-487f-846a-c5954fb06a5a:7fff192f-ce29-4673-890f-2d68ba557946",
+                    "external_id": "POS-LINE-001",
+                    "sku": "COFFEE-LARGE"
+                  },
+                  "features": [
+                    {
+                      "name": "variant_name",
+                      "value_type": "TEXT",
+                      "value": "Large"
+                    }
+                  ]
+                }
+              ],
+              "price": {
+                "net_amount": 777,
+                "gross_amount": 925,
+                "cart_discounts": [],
+                "taxes": [
+                  {
+                    "id": "tax-vat-19",
+                    "net_amount": 777,
+                    "gross_amount": 925,
+                    "tax_amount": 148
+                  }
+                ]
+              },
+              "tax_mode": "NO_TAX",
+              "source": {
+                "channel": "POS",
+                "sub_channel": "QR_CODE",
+                "external_id": "123456",
+                "external_sub_channel_id": "9736e947-6f1f-487f-846a-c5954fb06a5a"
+              },
+              "payments": [
+                {
+                  "method": "card",
+                  "reference": "TERTYFQ4G3",
+                  "type": "purchase",
+                  "amount": 975,
+                  "status": "SUCCESSFUL",
+                  "processed_at": "2026-06-02T10:20:00Z"
+                }
+              ],
+              "created_at": "2026-06-02T10:15:00Z",
+              "closed_at": "2026-06-02T10:20:00Z",
+              "state": "CLOSED"
+            }
+          ],
+          "pagination_token": "66bcbtzelrubzeuzruzgu76678trncH"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Validation error on the request.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+    method: GET
+    mode: none
+    params:query: {
+      ~pagination_token: 
+      pagination_limit: 10
+    }
+  
+    params:path: {
+      merchant_code: MCZM9TGQ
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "instance": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: The client is not authenticated (auth header is empty or invalid).
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+    method: GET
+    mode: none
+    params:query: {
+      ~pagination_token: 
+      pagination_limit: 10
+    }
+  
+    params:path: {
+      merchant_code: MCZM9TGQ
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "instance": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 403 Response
+  description: Missing `sales.read`, merchant code mismatch on the token, or no `merchant.read` permission.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+    method: GET
+    mode: none
+    params:query: {
+      ~pagination_token: 
+      pagination_limit: 10
+    }
+  
+    params:path: {
+      merchant_code: MCZM9TGQ
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "instance": ""
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 412 Response
+  description: User-Agent header is not present or is empty.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/sales
+    method: GET
+    mode: none
+    params:query: {
+      ~pagination_token: 
+      pagination_limit: 10
+    }
+  
+    params:path: {
+      merchant_code: MCZM9TGQ
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 412
+      text: Precondition Failed
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "instance": ""
+        }
+      '''
+    }
+  }
+}

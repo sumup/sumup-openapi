@@ -1,0 +1,178 @@
+meta {
+  name: Retrieve a transaction
+  type: http
+  seq: 2
+  tags: [
+    Transactions
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Retrieves the transaction resource with the specified transaction ID (the `id` parameter in the transaction resource).')
+  id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+  @description('Retrieves the transaction resource with the specified transaction code.')
+  transaction_code: TEENSK4W2K
+  @description('External transaction identifier supplied by the client.')
+  foreign_transaction_id: J13253253x1
+  @description('Client-supplied identifier of the transaction.')
+  client_transaction_id: urn:sumup:pos:sale:MNKKNGST:1D4E3B2D-111D-48D7-9AF0-832DAEF63DD7;2
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+}
+
+docs {
+  Retrieves the full details of an identified transaction. The transaction resource is identified by a query parameter and *one* of following parameters is required:
+  - `id`
+  - `transaction_code`
+  - `foreign_transaction_id`
+  - `client_transaction_id`
+}
+
+example {
+  name: 200 Response
+  description: Returns the requested transaction resource.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions
+    method: GET
+    mode: none
+    params:query: {
+      id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+      transaction_code: TEENSK4W2K
+      foreign_transaction_id: J13253253x1
+      client_transaction_id: urn:sumup:pos:sale:MNKKNGST:1D4E3B2D-111D-48D7-9AF0-832DAEF63DD7;2
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "transaction_code": "TEENSK4W2K",
+          "amount": 10.1,
+          "currency": "EUR",
+          "timestamp": "2020-02-29T10:56:56.876Z",
+          "status": "SUCCESSFUL",
+          "payment_type": "ECOM",
+          "installments_count": 1,
+          "merchant_code": "MH4H92C7",
+          "vat_amount": 6,
+          "tip_amount": 3,
+          "entry_mode": "customer entry",
+          "auth_code": "053201"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions
+    method: GET
+    mode: none
+    params:query: {
+      id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+      transaction_code: TEENSK4W2K
+      foreign_transaction_id: J13253253x1
+      client_transaction_id: urn:sumup:pos:sale:MNKKNGST:1D4E3B2D-111D-48D7-9AF0-832DAEF63DD7;2
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions
+    method: GET
+    mode: none
+    params:query: {
+      id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+      transaction_code: TEENSK4W2K
+      foreign_transaction_id: J13253253x1
+      client_transaction_id: urn:sumup:pos:sale:MNKKNGST:1D4E3B2D-111D-48D7-9AF0-832DAEF63DD7;2
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

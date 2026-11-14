@@ -1,0 +1,236 @@
+meta {
+  name: Retrieve a checkout
+  type: http
+  seq: 4
+  tags: [
+    Checkouts
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('SumUp-generated `id` returned when creating a checkout. Use this value to retrieve, update, process, or deactivate the checkout.')
+  checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+}
+
+docs {
+  Retrieves a checkout by its SumUp `checkout_id`. After processing a payment, returning from a redirect, or receiving a checkout notification, retrieve the checkout to confirm its current `status` before updating your order or displaying the payment outcome to the payer.
+}
+
+example {
+  name: Checkout
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Paid checkout with a transaction to refund
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 42.42,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 42.42,
+              "currency": "EUR",
+              "status": "SUCCESSFUL",
+              "timestamp": "2026-10-30T12:00:00+00:00"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout with a saved card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "save-card-123",
+          "amount": 1,
+          "currency": "EUR",
+          "merchant_code": "MCXXXXXX",
+          "description": "Save a card for future payments",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "purpose": "SETUP_RECURRING_PAYMENT",
+          "id": "7164c99b-13cb-42a1-8ba1-3c2c46a29de7",
+          "status": "PAID",
+          "date": "2026-10-30T12:00:00+00:00",
+          "transactions": [],
+          "payment_instrument": {
+            "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: GET
+    mode: none
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

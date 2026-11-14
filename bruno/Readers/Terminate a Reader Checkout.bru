@@ -1,0 +1,347 @@
+meta {
+  name: Terminate a Reader Checkout
+  type: http
+  seq: 11
+  tags: [
+    Readers
+  ]
+}
+
+post {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('Merchant Code')
+  merchant_code: MC0X0ABC
+  @description('The unique identifier of the Reader')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+docs {
+  Terminate a Reader Checkout stops the current transaction on the target device.
+  
+  This process is asynchronous and the actual termination may take some time to be performed on the device.
+  
+  
+  There are some caveats when using this endpoint:
+  * The target device must be online, otherwise terminate won't be accepted
+  * The action will succeed only if the device is waiting for cardholder action: e.g: waiting for card, waiting for PIN, etc.
+  * There is no confirmation of the termination.
+  
+  If a transaction is successfully terminated and `return_url` was provided on Checkout, the transaction status will be sent as `failed` to the provided URL.
+  
+  
+  **Note**: If the target device is a Solo, it must be in version 3.3.28.0 or higher.
+  
+}
+
+example {
+  name: 400 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Bad Request",
+          "status": 400,
+          "title": "Bad Request",
+          "type": "https://developer.sumup.com/problem/bad-request"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized",
+          "status": 401,
+          "title": "Unauthorized",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Not Found"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "status": 404,
+          "title": "Requested resource couldn't be found.",
+          "type": "https://developer.sumup.com/problem/not-found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "ReaderOffline": {
+            "description": "Error returned when the target device is not online.",
+            "value": {
+              "errors": {
+                "detail": "The device is offline.",
+                "type": "READER_OFFLINE"
+              }
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/terminate
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The device is offline.",
+          "status": 422,
+          "title": "Reader Offline",
+          "type": "https://developer.sumup.com/problem/reader-offline"
+        }
+      '''
+    }
+  }
+}

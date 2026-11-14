@@ -1,0 +1,313 @@
+meta {
+  name: Get a Reader Status
+  type: http
+  seq: 8
+  tags: [
+    Readers
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Merchant Code')
+  merchant_code: MC0X0ABC
+  @description('The unique identifier of the Reader')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+docs {
+  Provides the last known status for a Reader.
+  
+  This endpoint allows you to retrieve updates from the connected card reader, including the current screen being displayed during the payment process and the device status (battery level, connectivity, and update state).
+  
+  Supported States
+  
+  * `IDLE` – Reader ready for next transaction
+  * `SELECTING_TIP` – Waiting for tip input
+  * `WAITING_FOR_CARD` – Awaiting card insert/tap
+  * `WAITING_FOR_PIN` – Waiting for PIN entry
+  * `WAITING_FOR_SIGNATURE` – Waiting for customer signature
+  * `UPDATING_FIRMWARE` – Firmware update in progress
+  
+  Device Status
+  
+  * `ONLINE` – Device connected and operational
+  * `OFFLINE` – Device disconnected (last state persisted)
+  
+  **Note**: If the target device is a Solo, it must be in version 3.3.39.0 or higher.
+  
+}
+
+example {
+  name: 200 Response
+  description: Response with the device status.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "battery_level": 10,
+            "battery_temperature": 35,
+            "connection_type": "Wi-Fi",
+            "firmware_version": "3.3.3.21",
+            "last_activity": "2025-09-25T15:20:00Z",
+            "state": "IDLE",
+            "status": "ONLINE"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Bad request",
+            "type": "INVALID_BEARER_TOKEN"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Response when given params (or one of them) are invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Bad Request",
+          "status": 400,
+          "title": "Bad Request",
+          "type": "https://developer.sumup.com/problem/bad-request"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Response when given merchant's token is invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Unauthorized"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Response when given merchant's token is invalid
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized",
+          "status": 401,
+          "title": "Unauthorized",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Not Found"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Response when given reader is not found
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/status
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "status": 404,
+          "title": "Requested resource couldn't be found.",
+          "type": "https://developer.sumup.com/problem/not-found"
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,130 @@
+meta {
+  name: Delete a member
+  type: http
+  seq: 5
+  tags: [
+    Members
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+  @description('The ID of the member to retrieve.')
+  member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+}
+
+docs {
+  Deletes a merchant member.
+}
+
+example {
+  name: 200 Response
+  description: Returns an empty response if the deletion succeeded.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 403 Response
+  description: Member deletion was forbidden.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/forbidden",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "You do not have permission to perform this action."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Merchant or member not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you."
+        }
+      '''
+    }
+  }
+}

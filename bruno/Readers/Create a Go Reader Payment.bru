@@ -1,0 +1,271 @@
+meta {
+  name: Create a Go Reader Payment
+  type: http
+  seq: 1
+  tags: [
+    Readers
+  ]
+}
+
+post {
+  url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+  @description('The unique identifier of the reader.')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+body:json {
+  {
+    "affiliate": "",
+    "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+    "tip_amount": 200,
+    "total_amount": ""
+  }
+}
+
+docs {
+  Initiates a payment on the SumUp Go terminal identified by the reader ID.
+  
+  Use `client_transaction_id` as an idempotency key: retrying the request with the same value returns the result of the original payment instead of creating a duplicate.
+}
+
+example {
+  name: 200 Response
+  description: Returns the result of the payment initiated on the reader.
+  
+  request: {
+    url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "affiliate": "",
+        "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+        "tip_amount": 200,
+        "total_amount": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "client_transaction_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+            "transaction_code": "TEENSK4W2K"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: The request is invalid.
+  
+  request: {
+    url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "affiliate": "",
+        "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+        "tip_amount": 200,
+        "total_amount": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/bad-request",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "Request validation failed."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Authentication failed or missing required scope.
+  
+  request: {
+    url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "affiliate": "",
+        "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+        "tip_amount": 200,
+        "total_amount": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/unauthorized",
+          "title": "Unauthorized",
+          "status": 401,
+          "detail": "Authentication credentials are missing or invalid."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The requested Reader resource does not exist.
+  
+  request: {
+    url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "affiliate": "",
+        "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+        "tip_amount": 200,
+        "total_amount": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: The request could not be processed as it violates a business rule.
+  
+  request: {
+    url: {{baseUrl}}/v0/merchants/:merchant_code/readers/:reader_id/go-checkout
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "affiliate": "",
+        "client_transaction_id": "19e12390-72cf-4f9f-80b5-b0c8a67fa43f",
+        "tip_amount": 200,
+        "total_amount": ""
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/validation-error",
+          "title": "Unprocessable Entity",
+          "status": 422,
+          "detail": "Validation failed."
+        }
+      '''
+    }
+  }
+}

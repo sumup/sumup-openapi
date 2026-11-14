@@ -1,0 +1,457 @@
+meta {
+  name: List transactions
+  type: http
+  seq: 3
+  tags: [
+    Transactions
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Retrieves the transaction resource with the specified transaction code.')
+  transaction_code: TEENSK4W2K
+  @description('Sort direction for the transaction history. Use `ascending` or `descending`; the default is `ascending`.')
+  order: ascending
+  @description('Maximum number of transactions per page. Must be a positive integer. Defaults to `10` when omitted; a page can contain fewer results.')
+  limit: 10
+  @description('Filters transactions by user email. For multiple values, repeat the query parameter, for example `users[]=first@example.com&users[]=second@example.com`.')
+  users[]: merchant@example.com
+  @description('Filters the results by the latest modification time of resources and returns only transactions that are modified *at or after* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  changes_since: 2019-08-28T09:00:00Z
+  @description('Filters the results by the creation time of resources and returns only transactions that are created *before* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  newest_time: 2019-08-29T09:00:00Z
+  @description('Pagination reference that returns results before the specified reference. Use the value from a returned pagination link rather than constructing it yourself. This parameter takes precedence over `newest_time` when both are provided.')
+  newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+  @description('Filters the results by the creation time of resources and returns only transactions that are created *at or after* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  oldest_time: 2019-08-28T09:00:00Z
+  @description('Pagination reference that returns results after the specified reference. Use the value from a returned pagination link rather than constructing it yourself. This parameter takes precedence over `oldest_time` when both are provided.')
+  oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+  @description('Sort direction for the transaction history. Use `ascending` or `descending`; the default is `ascending`.')
+  ~order: descending
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  ~statuses[]: SUCCESSFUL
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  ~statuses[]: CANCELLED
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  ~statuses[]: FAILED
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  ~statuses[]: REFUNDED
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  ~statuses[]: CHARGE_BACK
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: CASH
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: POS
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: ECOM
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: RECURRING
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: BITCOIN
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: BALANCE
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: MOTO
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: BOLETO
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: DIRECT_DEBIT
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: APM
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  ~payment_types[]: UNKNOWN
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: none
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: magstripe
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: chip
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: manual entry
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: customer entry
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: magstripe fallback
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: contactless
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: moto
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: contactless magstripe
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: boleto
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: direct debit
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: sofort
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: ideal
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: bancontact
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: eps
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: mybank
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: satispay
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: blik
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: p24
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: giropay
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: pix
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: qr code pix
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: apple pay
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: google pay
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: sumup gift card
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: paypal
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: twint
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: iris
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: sumup pay
+  @description('Filters the returned results by the specified list of entry modes.')
+  ~entry_modes[]: na
+  @description('Filters the returned results by the specified list of transaction types.')
+  ~types[]: PAYMENT
+  @description('Filters the returned results by the specified list of transaction types.')
+  ~types[]: REFUND
+  @description('Filters the returned results by the specified list of transaction types.')
+  ~types[]: CHARGE_BACK
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+}
+
+docs {
+  Lists transaction history for the merchant, with optional filters for payment type, status, and date range. The response contains the current page in `items` and pagination query strings in `links`.
+  
+  To request another page, use the query string from the relevant link's `href` with this history endpoint. Use `changes_since` when retrieving transactions modified since a previous synchronization, including transactions created earlier whose status has changed.
+}
+
+example {
+  name: 200 Response
+  description: Returns a page of transaction history items.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      ~statuses[]: SUCCESSFUL
+      ~statuses[]: CANCELLED
+      ~statuses[]: FAILED
+      ~statuses[]: REFUNDED
+      ~statuses[]: CHARGE_BACK
+      ~payment_types[]: CASH
+      ~payment_types[]: POS
+      ~payment_types[]: ECOM
+      ~payment_types[]: RECURRING
+      ~payment_types[]: BITCOIN
+      ~payment_types[]: BALANCE
+      ~payment_types[]: MOTO
+      ~payment_types[]: BOLETO
+      ~payment_types[]: DIRECT_DEBIT
+      ~payment_types[]: APM
+      ~payment_types[]: UNKNOWN
+      ~entry_modes[]: none
+      ~entry_modes[]: magstripe
+      ~entry_modes[]: chip
+      ~entry_modes[]: manual entry
+      ~entry_modes[]: customer entry
+      ~entry_modes[]: magstripe fallback
+      ~entry_modes[]: contactless
+      ~entry_modes[]: moto
+      ~entry_modes[]: contactless magstripe
+      ~entry_modes[]: boleto
+      ~entry_modes[]: direct debit
+      ~entry_modes[]: sofort
+      ~entry_modes[]: ideal
+      ~entry_modes[]: bancontact
+      ~entry_modes[]: eps
+      ~entry_modes[]: mybank
+      ~entry_modes[]: satispay
+      ~entry_modes[]: blik
+      ~entry_modes[]: p24
+      ~entry_modes[]: giropay
+      ~entry_modes[]: pix
+      ~entry_modes[]: qr code pix
+      ~entry_modes[]: apple pay
+      ~entry_modes[]: google pay
+      ~entry_modes[]: sumup gift card
+      ~entry_modes[]: paypal
+      ~entry_modes[]: twint
+      ~entry_modes[]: iris
+      ~entry_modes[]: sumup pay
+      ~entry_modes[]: na
+      ~types[]: PAYMENT
+      ~types[]: REFUND
+      ~types[]: CHARGE_BACK
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "items": [
+            {
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "user": "merchant@example.com",
+              "type": "PAYMENT",
+              "payout_date": "2019-08-28",
+              "payout_type": "BANK_ACCOUNT",
+              "refunded_amount": 0
+            }
+          ],
+          "links": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter
+  description: A request parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      ~statuses[]: SUCCESSFUL
+      ~statuses[]: CANCELLED
+      ~statuses[]: FAILED
+      ~statuses[]: REFUNDED
+      ~statuses[]: CHARGE_BACK
+      ~payment_types[]: CASH
+      ~payment_types[]: POS
+      ~payment_types[]: ECOM
+      ~payment_types[]: RECURRING
+      ~payment_types[]: BITCOIN
+      ~payment_types[]: BALANCE
+      ~payment_types[]: MOTO
+      ~payment_types[]: BOLETO
+      ~payment_types[]: DIRECT_DEBIT
+      ~payment_types[]: APM
+      ~payment_types[]: UNKNOWN
+      ~entry_modes[]: none
+      ~entry_modes[]: magstripe
+      ~entry_modes[]: chip
+      ~entry_modes[]: manual entry
+      ~entry_modes[]: customer entry
+      ~entry_modes[]: magstripe fallback
+      ~entry_modes[]: contactless
+      ~entry_modes[]: moto
+      ~entry_modes[]: contactless magstripe
+      ~entry_modes[]: boleto
+      ~entry_modes[]: direct debit
+      ~entry_modes[]: sofort
+      ~entry_modes[]: ideal
+      ~entry_modes[]: bancontact
+      ~entry_modes[]: eps
+      ~entry_modes[]: mybank
+      ~entry_modes[]: satispay
+      ~entry_modes[]: blik
+      ~entry_modes[]: p24
+      ~entry_modes[]: giropay
+      ~entry_modes[]: pix
+      ~entry_modes[]: qr code pix
+      ~entry_modes[]: apple pay
+      ~entry_modes[]: google pay
+      ~entry_modes[]: sumup gift card
+      ~entry_modes[]: paypal
+      ~entry_modes[]: twint
+      ~entry_modes[]: iris
+      ~entry_modes[]: sumup pay
+      ~entry_modes[]: na
+      ~types[]: PAYMENT
+      ~types[]: REFUND
+      ~types[]: CHARGE_BACK
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      ~statuses[]: SUCCESSFUL
+      ~statuses[]: CANCELLED
+      ~statuses[]: FAILED
+      ~statuses[]: REFUNDED
+      ~statuses[]: CHARGE_BACK
+      ~payment_types[]: CASH
+      ~payment_types[]: POS
+      ~payment_types[]: ECOM
+      ~payment_types[]: RECURRING
+      ~payment_types[]: BITCOIN
+      ~payment_types[]: BALANCE
+      ~payment_types[]: MOTO
+      ~payment_types[]: BOLETO
+      ~payment_types[]: DIRECT_DEBIT
+      ~payment_types[]: APM
+      ~payment_types[]: UNKNOWN
+      ~entry_modes[]: none
+      ~entry_modes[]: magstripe
+      ~entry_modes[]: chip
+      ~entry_modes[]: manual entry
+      ~entry_modes[]: customer entry
+      ~entry_modes[]: magstripe fallback
+      ~entry_modes[]: contactless
+      ~entry_modes[]: moto
+      ~entry_modes[]: contactless magstripe
+      ~entry_modes[]: boleto
+      ~entry_modes[]: direct debit
+      ~entry_modes[]: sofort
+      ~entry_modes[]: ideal
+      ~entry_modes[]: bancontact
+      ~entry_modes[]: eps
+      ~entry_modes[]: mybank
+      ~entry_modes[]: satispay
+      ~entry_modes[]: blik
+      ~entry_modes[]: p24
+      ~entry_modes[]: giropay
+      ~entry_modes[]: pix
+      ~entry_modes[]: qr code pix
+      ~entry_modes[]: apple pay
+      ~entry_modes[]: google pay
+      ~entry_modes[]: sumup gift card
+      ~entry_modes[]: paypal
+      ~entry_modes[]: twint
+      ~entry_modes[]: iris
+      ~entry_modes[]: sumup pay
+      ~entry_modes[]: na
+      ~types[]: PAYMENT
+      ~types[]: REFUND
+      ~types[]: CHARGE_BACK
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}

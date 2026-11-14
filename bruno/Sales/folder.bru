@@ -1,0 +1,16 @@
+meta {
+  name: Sales
+}
+
+auth {
+  mode: inherit
+}
+
+docs {
+  Read a merchant's fully-paid, closed sales, including item lines, taxes, discounts, and payments.
+  
+  List sales to retrieve full `Sale` objects, or search by date, payment status, and sales channel
+  to retrieve summaries. Use a summary's `id` to get the full sale.
+  
+  Amounts are expressed in minor units according to each sale's `currency.scale`.
+}

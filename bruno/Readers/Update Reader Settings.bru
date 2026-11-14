@@ -1,0 +1,468 @@
+meta {
+  name: Update Reader Settings
+  type: http
+  seq: 10
+  tags: [
+    Readers
+  ]
+}
+
+patch {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('The merchant code of the account that owns the reader.')
+  merchant_code: MC0X0ABC
+  @description('The unique identifier of the reader.')
+  reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+body:json {
+  {
+    "menu_lock": {
+      "enabled": true,
+      "passcode": "1234"
+    }
+  }
+}
+
+docs {
+  Updates the menu lock settings for a Solo reader. The reader must be online.
+  A successful response confirms that the reader applied the update.
+  
+  Include at least one of `menu_lock.enabled` or `menu_lock.passcode`.
+  Omitted settings keep their current values. The response contains only the
+  settings included in the request.
+  
+  When enabling menu lock for a reader without a PIN, include a four-digit PIN
+  in `menu_lock.passcode` in the same request.
+  
+}
+
+example {
+  name: 200 Response
+  description: Reader settings updated successfully.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "data": {
+            "menu_lock": {
+              "enabled": true,
+              "passcode": "1234"
+            },
+            "status": "applied"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: The request body is malformed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: The request body is malformed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Bad Request",
+          "status": 400,
+          "title": "Bad Request",
+          "type": "https://developer.sumup.com/problem/bad-request"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "",
+            "type": ""
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 401 Response
+  description: Unauthorized
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized",
+          "status": 401,
+          "title": "Unauthorized",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The reader was not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "Not Found"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The reader was not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "status": 404,
+          "title": "Requested resource couldn't be found.",
+          "type": "https://developer.sumup.com/problem/not-found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: The settings are invalid, the reader is offline, the reader model is not supported, the firmware version is unsupported, or the reader could not apply the update.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "errors": {
+            "detail": "The device is offline.",
+            "type": "READER_OFFLINE"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 422 Response
+  description: The settings are invalid, the reader is offline, the reader model is not supported, the firmware version is unsupported, or the reader could not apply the update.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
+    method: PATCH
+    mode: json
+    params:path: {
+      merchant_code: MC0X0ABC
+      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    body:json: {
+      {
+        "menu_lock": {
+          "enabled": true,
+          "passcode": "1234"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "The device is offline.",
+          "status": 422,
+          "title": "Reader Offline",
+          "type": "https://developer.sumup.com/problem/reader-offline"
+        }
+      '''
+    }
+  }
+}

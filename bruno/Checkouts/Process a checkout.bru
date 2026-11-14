@@ -1,0 +1,3528 @@
+meta {
+  name: Process a checkout
+  type: http
+  seq: 6
+  tags: [
+    Checkouts
+  ]
+}
+
+put {
+  url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('SumUp-generated `id` returned when creating a checkout. Use this value to retrieve, update, process, or deactivate the checkout.')
+  checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+}
+
+body:json {
+  {
+    "payment_type": "card",
+    "installments": 1,
+    "mandate": {
+      "type": "recurrent",
+      "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+      "user_ip": "172.217.169.174"
+    },
+    "card": {
+      "type": "VISA",
+      "name": "John Doe",
+      "number": "1234567890123456",
+      "expiry_year": "2023",
+      "expiry_month": "01",
+      "cvv": "123",
+      "zip_code": "12345"
+    }
+  }
+}
+
+docs {
+  :::caution[PCI DSS compliance required]
+  When you submit raw card details directly to the Checkout API, your systems store, process, or transmit cardholder data and are therefore subject to applicable [PCI DSS requirements](https://www.pcisecuritystandards.org/document_library/). You should only use this integration if your environment is appropriately PCI DSS compliant.
+  :::
+  
+  Processing a checkout will attempt to charge the provided payment instrument for the amount of the specified checkout resource initiated in the `Create a checkout` endpoint.
+  
+  A processing response can require an additional payer action, such as a 3DS challenge or a payment-provider redirect. If `next_step` is returned, follow its instructions to continue the payment flow.
+  
+  Retrieve the checkout afterwards to confirm its payment status. Acceptance of the processing request does not by itself mean the checkout is paid.
+}
+
+example {
+  name: CheckoutSuccessCard (ProcessCard)
+  description: Successfully processed checkout with a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "return_url": "http://example.com",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ],
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessCard (ProcessToken)
+  description: Successfully processed checkout with a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "return_url": "http://example.com",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ],
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessCard (ProcessBoleto)
+  description: Successfully processed checkout with a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "return_url": "http://example.com",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ],
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessCard (ProcessiDeal)
+  description: Successfully processed checkout with a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "return_url": "http://example.com",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ],
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessCard (ProcessBancontact)
+  description: Successfully processed checkout with a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase",
+          "return_url": "http://example.com",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ],
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessToken (ProcessCard)
+  description: Successfully processed checkout with a token
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase with token",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "merchant_name": "Sample Merchant",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "payment_instrument": {
+            "token": "e76d7e5c-9375-4fac-a7e7-b19dc5302fbc"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessToken (ProcessToken)
+  description: Successfully processed checkout with a token
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase with token",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "merchant_name": "Sample Merchant",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "payment_instrument": {
+            "token": "e76d7e5c-9375-4fac-a7e7-b19dc5302fbc"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessToken (ProcessBoleto)
+  description: Successfully processed checkout with a token
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase with token",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "merchant_name": "Sample Merchant",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "payment_instrument": {
+            "token": "e76d7e5c-9375-4fac-a7e7-b19dc5302fbc"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessToken (ProcessiDeal)
+  description: Successfully processed checkout with a token
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase with token",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "merchant_name": "Sample Merchant",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "payment_instrument": {
+            "token": "e76d7e5c-9375-4fac-a7e7-b19dc5302fbc"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessToken (ProcessBancontact)
+  description: Successfully processed checkout with a token
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "Purchase with token",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PAID",
+          "date": "2020-02-29T10:56:56+00:00",
+          "transaction_code": "TEENSK4W2K",
+          "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+          "merchant_name": "Sample Merchant",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "payment_instrument": {
+            "token": "e76d7e5c-9375-4fac-a7e7-b19dc5302fbc"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "053201"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBoleto (ProcessCard)
+  description: Boleto payment initiated, awaiting payment by the payer
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "BRL",
+          "merchant_code": "MH4H92C7",
+          "description": "Boleto checkout",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2021-07-06T12:34:02.000+00:00",
+          "merchant_name": "Sample shop",
+          "boleto": {
+            "barcode": "34191090081790614310603072340007886840000000200",
+            "url": "https://checkouts.sample.com/v0.1/checkouts/2e7a36cc-7897-446b-a966-952ab5f049ea/boleto"
+          },
+          "redirect_url": "https://website.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "debd2986-9852-4e86-8a8e-7ea9c87dd679",
+              "transaction_code": "TEN3E696NP",
+              "merchant_code": "MH4H92C9",
+              "amount": 10.1,
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "currency": "BRL",
+              "timestamp": "2021-07-06T12:34:16.460+00:00",
+              "status": "PENDING",
+              "payment_type": "BOLETO",
+              "entry_mode": "BOLETO",
+              "installments_count": 1
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBoleto (ProcessToken)
+  description: Boleto payment initiated, awaiting payment by the payer
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "BRL",
+          "merchant_code": "MH4H92C7",
+          "description": "Boleto checkout",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2021-07-06T12:34:02.000+00:00",
+          "merchant_name": "Sample shop",
+          "boleto": {
+            "barcode": "34191090081790614310603072340007886840000000200",
+            "url": "https://checkouts.sample.com/v0.1/checkouts/2e7a36cc-7897-446b-a966-952ab5f049ea/boleto"
+          },
+          "redirect_url": "https://website.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "debd2986-9852-4e86-8a8e-7ea9c87dd679",
+              "transaction_code": "TEN3E696NP",
+              "merchant_code": "MH4H92C9",
+              "amount": 10.1,
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "currency": "BRL",
+              "timestamp": "2021-07-06T12:34:16.460+00:00",
+              "status": "PENDING",
+              "payment_type": "BOLETO",
+              "entry_mode": "BOLETO",
+              "installments_count": 1
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBoleto (ProcessBoleto)
+  description: Boleto payment initiated, awaiting payment by the payer
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "BRL",
+          "merchant_code": "MH4H92C7",
+          "description": "Boleto checkout",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2021-07-06T12:34:02.000+00:00",
+          "merchant_name": "Sample shop",
+          "boleto": {
+            "barcode": "34191090081790614310603072340007886840000000200",
+            "url": "https://checkouts.sample.com/v0.1/checkouts/2e7a36cc-7897-446b-a966-952ab5f049ea/boleto"
+          },
+          "redirect_url": "https://website.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "debd2986-9852-4e86-8a8e-7ea9c87dd679",
+              "transaction_code": "TEN3E696NP",
+              "merchant_code": "MH4H92C9",
+              "amount": 10.1,
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "currency": "BRL",
+              "timestamp": "2021-07-06T12:34:16.460+00:00",
+              "status": "PENDING",
+              "payment_type": "BOLETO",
+              "entry_mode": "BOLETO",
+              "installments_count": 1
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBoleto (ProcessiDeal)
+  description: Boleto payment initiated, awaiting payment by the payer
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "BRL",
+          "merchant_code": "MH4H92C7",
+          "description": "Boleto checkout",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2021-07-06T12:34:02.000+00:00",
+          "merchant_name": "Sample shop",
+          "boleto": {
+            "barcode": "34191090081790614310603072340007886840000000200",
+            "url": "https://checkouts.sample.com/v0.1/checkouts/2e7a36cc-7897-446b-a966-952ab5f049ea/boleto"
+          },
+          "redirect_url": "https://website.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "debd2986-9852-4e86-8a8e-7ea9c87dd679",
+              "transaction_code": "TEN3E696NP",
+              "merchant_code": "MH4H92C9",
+              "amount": 10.1,
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "currency": "BRL",
+              "timestamp": "2021-07-06T12:34:16.460+00:00",
+              "status": "PENDING",
+              "payment_type": "BOLETO",
+              "entry_mode": "BOLETO",
+              "installments_count": 1
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBoleto (ProcessBancontact)
+  description: Boleto payment initiated, awaiting payment by the payer
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+          "amount": 10.1,
+          "currency": "BRL",
+          "merchant_code": "MH4H92C7",
+          "description": "Boleto checkout",
+          "id": "4e425463-3e1b-431d-83fa-1e51c2925e99",
+          "status": "PENDING",
+          "date": "2021-07-06T12:34:02.000+00:00",
+          "merchant_name": "Sample shop",
+          "boleto": {
+            "barcode": "34191090081790614310603072340007886840000000200",
+            "url": "https://checkouts.sample.com/v0.1/checkouts/2e7a36cc-7897-446b-a966-952ab5f049ea/boleto"
+          },
+          "redirect_url": "https://website.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "debd2986-9852-4e86-8a8e-7ea9c87dd679",
+              "transaction_code": "TEN3E696NP",
+              "merchant_code": "MH4H92C9",
+              "amount": 10.1,
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "currency": "BRL",
+              "timestamp": "2021-07-06T12:34:16.460+00:00",
+              "status": "PENDING",
+              "payment_type": "BOLETO",
+              "entry_mode": "BOLETO",
+              "installments_count": 1
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessiDeal (ProcessCard)
+  description: iDEAL processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simideal",
+            "method": "GET",
+            "payload": {
+              "tx": "961473700",
+              "rs": "ILnaUeQTKJ184fVrjGILrLjePX9E4rmz",
+              "cs": "c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5"
+            },
+            "full": "https://r3.girogate.de/ti/simideal?tx=961473700&rs=ILnaUeQTKJ184fVrjGILrLjePX9E4rmz&cs=c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessiDeal (ProcessToken)
+  description: iDEAL processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simideal",
+            "method": "GET",
+            "payload": {
+              "tx": "961473700",
+              "rs": "ILnaUeQTKJ184fVrjGILrLjePX9E4rmz",
+              "cs": "c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5"
+            },
+            "full": "https://r3.girogate.de/ti/simideal?tx=961473700&rs=ILnaUeQTKJ184fVrjGILrLjePX9E4rmz&cs=c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessiDeal (ProcessBoleto)
+  description: iDEAL processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simideal",
+            "method": "GET",
+            "payload": {
+              "tx": "961473700",
+              "rs": "ILnaUeQTKJ184fVrjGILrLjePX9E4rmz",
+              "cs": "c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5"
+            },
+            "full": "https://r3.girogate.de/ti/simideal?tx=961473700&rs=ILnaUeQTKJ184fVrjGILrLjePX9E4rmz&cs=c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessiDeal (ProcessiDeal)
+  description: iDEAL processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simideal",
+            "method": "GET",
+            "payload": {
+              "tx": "961473700",
+              "rs": "ILnaUeQTKJ184fVrjGILrLjePX9E4rmz",
+              "cs": "c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5"
+            },
+            "full": "https://r3.girogate.de/ti/simideal?tx=961473700&rs=ILnaUeQTKJ184fVrjGILrLjePX9E4rmz&cs=c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessiDeal (ProcessBancontact)
+  description: iDEAL processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simideal",
+            "method": "GET",
+            "payload": {
+              "tx": "961473700",
+              "rs": "ILnaUeQTKJ184fVrjGILrLjePX9E4rmz",
+              "cs": "c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5"
+            },
+            "full": "https://r3.girogate.de/ti/simideal?tx=961473700&rs=ILnaUeQTKJ184fVrjGILrLjePX9E4rmz&cs=c8bc0ea231f8372431ca22d6f8319f8de0263d0b1705759ed27155f245f193c5",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBancontact (ProcessCard)
+  description: Bancontact processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simbcmc",
+            "method": "GET",
+            "payload": {
+              "tx": "624788471",
+              "rs": "5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB",
+              "cs": "697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc"
+            },
+            "full": "https://r3.girogate.de/ti/simbcmc?tx=624788471&rs=5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB&cs=697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBancontact (ProcessToken)
+  description: Bancontact processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simbcmc",
+            "method": "GET",
+            "payload": {
+              "tx": "624788471",
+              "rs": "5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB",
+              "cs": "697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc"
+            },
+            "full": "https://r3.girogate.de/ti/simbcmc?tx=624788471&rs=5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB&cs=697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBancontact (ProcessBoleto)
+  description: Bancontact processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simbcmc",
+            "method": "GET",
+            "payload": {
+              "tx": "624788471",
+              "rs": "5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB",
+              "cs": "697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc"
+            },
+            "full": "https://r3.girogate.de/ti/simbcmc?tx=624788471&rs=5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB&cs=697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBancontact (ProcessiDeal)
+  description: Bancontact processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simbcmc",
+            "method": "GET",
+            "payload": {
+              "tx": "624788471",
+              "rs": "5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB",
+              "cs": "697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc"
+            },
+            "full": "https://r3.girogate.de/ti/simbcmc?tx=624788471&rs=5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB&cs=697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutSuccessBancontact (ProcessBancontact)
+  description: Bancontact processing response requiring a payer redirect
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://r3.girogate.de/ti/simbcmc",
+            "method": "GET",
+            "payload": {
+              "tx": "624788471",
+              "rs": "5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB",
+              "cs": "697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc"
+            },
+            "full": "https://r3.girogate.de/ti/simbcmc?tx=624788471&rs=5MioXoKt2Gwj9dLgqAX1bMRBuT5xTSdB&cs=697edacdd9175f3f99542500fa0ff08280b66aaff3c2641a2e212e4b039473cc",
+            "mechanism": [
+              "browser"
+            ]
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 202 Response (ProcessCard)
+  description: Returns the next required action for asynchronous checkout processing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 202
+      text: Accepted
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://dummy-3ds-gateway.com/cap?RID=1233&VAA=A",
+            "method": "POST",
+            "redirect_url": "https://mysite.com/completed_purchase",
+            "mechanism": [
+              "iframe"
+            ],
+            "payload": {
+              "PaReq": "eJxVUttu2zAM/RXDr4MjyY5dO6BVuE27FZuDZHGG9VGRmMSFb/Wljff1k9KkF0APPCR1eHQouD6WhfWCbZfXVWyzCbUtrGSt8mof25vs3gltq+tFpURRVxjbI3b2NYfs0CLO1yiHFjmk2HVij1auYrsRW1+F0U4qZxfKwJlur4QTYcQcJoIdc+XO2/poc1gmv/GZw3k216MnLpAL1JytPIiq5yDk883Dgk+DwPV9IGcIJbYPc84o1Ye6lHqu5wVA3tJQiRL5eiiHxlqKscSq76xfeZn3qICciiDroerbkYeuvnYBMLQFP/R9MyOkM9cnCoGYJJAPScvBRJ0mOeaKr/6l08XT6jXN7tx0vvHSbOMtsj1dzB9jIKYDlOiRu1omYyy0WDCj0YxFQE55EKWZzj2f6ee9xdCYEcmnwucEaN9bvaeRR1ehFn9BgMdGr0l3aCvfYyAfem9/GENlrz36ufpTBPTv07r8lm3qpPiOo1y/7u+SJImNzacmw5hrX1wt/kRpABBDQ84bJOf16+jLt/gPhUvGGw==",
+              "MD": "b1a536c0-29b9-11eb-adc1-0242ac120002",
+              "TermUrl": "https://api.sumup.com/v0.1/checkouts/e552de3b-1777-4c91-bdb8-756967678572/complete_payment"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 202 Response (ProcessToken)
+  description: Returns the next required action for asynchronous checkout processing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 202
+      text: Accepted
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://dummy-3ds-gateway.com/cap?RID=1233&VAA=A",
+            "method": "POST",
+            "redirect_url": "https://mysite.com/completed_purchase",
+            "mechanism": [
+              "iframe"
+            ],
+            "payload": {
+              "PaReq": "eJxVUttu2zAM/RXDr4MjyY5dO6BVuE27FZuDZHGG9VGRmMSFb/Wljff1k9KkF0APPCR1eHQouD6WhfWCbZfXVWyzCbUtrGSt8mof25vs3gltq+tFpURRVxjbI3b2NYfs0CLO1yiHFjmk2HVij1auYrsRW1+F0U4qZxfKwJlur4QTYcQcJoIdc+XO2/poc1gmv/GZw3k216MnLpAL1JytPIiq5yDk883Dgk+DwPV9IGcIJbYPc84o1Ye6lHqu5wVA3tJQiRL5eiiHxlqKscSq76xfeZn3qICciiDroerbkYeuvnYBMLQFP/R9MyOkM9cnCoGYJJAPScvBRJ0mOeaKr/6l08XT6jXN7tx0vvHSbOMtsj1dzB9jIKYDlOiRu1omYyy0WDCj0YxFQE55EKWZzj2f6ee9xdCYEcmnwucEaN9bvaeRR1ehFn9BgMdGr0l3aCvfYyAfem9/GENlrz36ufpTBPTv07r8lm3qpPiOo1y/7u+SJImNzacmw5hrX1wt/kRpABBDQ84bJOf16+jLt/gPhUvGGw==",
+              "MD": "b1a536c0-29b9-11eb-adc1-0242ac120002",
+              "TermUrl": "https://api.sumup.com/v0.1/checkouts/e552de3b-1777-4c91-bdb8-756967678572/complete_payment"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 202 Response (ProcessBoleto)
+  description: Returns the next required action for asynchronous checkout processing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 202
+      text: Accepted
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://dummy-3ds-gateway.com/cap?RID=1233&VAA=A",
+            "method": "POST",
+            "redirect_url": "https://mysite.com/completed_purchase",
+            "mechanism": [
+              "iframe"
+            ],
+            "payload": {
+              "PaReq": "eJxVUttu2zAM/RXDr4MjyY5dO6BVuE27FZuDZHGG9VGRmMSFb/Wljff1k9KkF0APPCR1eHQouD6WhfWCbZfXVWyzCbUtrGSt8mof25vs3gltq+tFpURRVxjbI3b2NYfs0CLO1yiHFjmk2HVij1auYrsRW1+F0U4qZxfKwJlur4QTYcQcJoIdc+XO2/poc1gmv/GZw3k216MnLpAL1JytPIiq5yDk883Dgk+DwPV9IGcIJbYPc84o1Ye6lHqu5wVA3tJQiRL5eiiHxlqKscSq76xfeZn3qICciiDroerbkYeuvnYBMLQFP/R9MyOkM9cnCoGYJJAPScvBRJ0mOeaKr/6l08XT6jXN7tx0vvHSbOMtsj1dzB9jIKYDlOiRu1omYyy0WDCj0YxFQE55EKWZzj2f6ee9xdCYEcmnwucEaN9bvaeRR1ehFn9BgMdGr0l3aCvfYyAfem9/GENlrz36ufpTBPTv07r8lm3qpPiOo1y/7u+SJImNzacmw5hrX1wt/kRpABBDQ84bJOf16+jLt/gPhUvGGw==",
+              "MD": "b1a536c0-29b9-11eb-adc1-0242ac120002",
+              "TermUrl": "https://api.sumup.com/v0.1/checkouts/e552de3b-1777-4c91-bdb8-756967678572/complete_payment"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 202 Response (ProcessiDeal)
+  description: Returns the next required action for asynchronous checkout processing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 202
+      text: Accepted
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://dummy-3ds-gateway.com/cap?RID=1233&VAA=A",
+            "method": "POST",
+            "redirect_url": "https://mysite.com/completed_purchase",
+            "mechanism": [
+              "iframe"
+            ],
+            "payload": {
+              "PaReq": "eJxVUttu2zAM/RXDr4MjyY5dO6BVuE27FZuDZHGG9VGRmMSFb/Wljff1k9KkF0APPCR1eHQouD6WhfWCbZfXVWyzCbUtrGSt8mof25vs3gltq+tFpURRVxjbI3b2NYfs0CLO1yiHFjmk2HVij1auYrsRW1+F0U4qZxfKwJlur4QTYcQcJoIdc+XO2/poc1gmv/GZw3k216MnLpAL1JytPIiq5yDk883Dgk+DwPV9IGcIJbYPc84o1Ye6lHqu5wVA3tJQiRL5eiiHxlqKscSq76xfeZn3qICciiDroerbkYeuvnYBMLQFP/R9MyOkM9cnCoGYJJAPScvBRJ0mOeaKr/6l08XT6jXN7tx0vvHSbOMtsj1dzB9jIKYDlOiRu1omYyy0WDCj0YxFQE55EKWZzj2f6ee9xdCYEcmnwucEaN9bvaeRR1ehFn9BgMdGr0l3aCvfYyAfem9/GENlrz36ufpTBPTv07r8lm3qpPiOo1y/7u+SJImNzacmw5hrX1wt/kRpABBDQ84bJOf16+jLt/gPhUvGGw==",
+              "MD": "b1a536c0-29b9-11eb-adc1-0242ac120002",
+              "TermUrl": "https://api.sumup.com/v0.1/checkouts/e552de3b-1777-4c91-bdb8-756967678572/complete_payment"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 202 Response (ProcessBancontact)
+  description: Returns the next required action for asynchronous checkout processing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 202
+      text: Accepted
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "next_step": {
+            "url": "https://dummy-3ds-gateway.com/cap?RID=1233&VAA=A",
+            "method": "POST",
+            "redirect_url": "https://mysite.com/completed_purchase",
+            "mechanism": [
+              "iframe"
+            ],
+            "payload": {
+              "PaReq": "eJxVUttu2zAM/RXDr4MjyY5dO6BVuE27FZuDZHGG9VGRmMSFb/Wljff1k9KkF0APPCR1eHQouD6WhfWCbZfXVWyzCbUtrGSt8mof25vs3gltq+tFpURRVxjbI3b2NYfs0CLO1yiHFjmk2HVij1auYrsRW1+F0U4qZxfKwJlur4QTYcQcJoIdc+XO2/poc1gmv/GZw3k216MnLpAL1JytPIiq5yDk883Dgk+DwPV9IGcIJbYPc84o1Ye6lHqu5wVA3tJQiRL5eiiHxlqKscSq76xfeZn3qICciiDroerbkYeuvnYBMLQFP/R9MyOkM9cnCoGYJJAPScvBRJ0mOeaKr/6l08XT6jXN7tx0vvHSbOMtsj1dzB9jIKYDlOiRu1omYyy0WDCj0YxFQE55EKWZzj2f6ee9xdCYEcmnwucEaN9bvaeRR1ehFn9BgMdGr0l3aCvfYyAfem9/GENlrz36ufpTBPTv07r8lm3qpPiOo1y/7u+SJImNzacmw5hrX1wt/kRpABBDQ84bJOf16+jLt/gPhUvGGw==",
+              "MD": "b1a536c0-29b9-11eb-adc1-0242ac120002",
+              "TermUrl": "https://api.sumup.com/v0.1/checkouts/e552de3b-1777-4c91-bdb8-756967678572/complete_payment"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter (ProcessCard)
+  description: A required parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID",
+          "param": "card.expiry_year"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter (ProcessToken)
+  description: A required parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID",
+          "param": "card.expiry_year"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter (ProcessBoleto)
+  description: A required parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID",
+          "param": "card.expiry_year"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter (ProcessiDeal)
+  description: A required parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID",
+          "param": "card.expiry_year"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter (ProcessBancontact)
+  description: A required parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID",
+          "param": "card.expiry_year"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Multiple_Invalid_Parameters (ProcessCard)
+  description: Multiple required parameters have invalid values.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.name"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.number"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.expiry_year"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Multiple_Invalid_Parameters (ProcessToken)
+  description: Multiple required parameters have invalid values.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.name"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.number"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.expiry_year"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Multiple_Invalid_Parameters (ProcessBoleto)
+  description: Multiple required parameters have invalid values.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.name"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.number"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.expiry_year"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Multiple_Invalid_Parameters (ProcessiDeal)
+  description: Multiple required parameters have invalid values.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.name"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.number"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.expiry_year"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Multiple_Invalid_Parameters (ProcessBancontact)
+  description: Multiple required parameters have invalid values.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.name"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.number"
+          },
+          {
+            "error_code": "INVALID",
+            "message": "Validation error",
+            "param": "card.expiry_year"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (ProcessCard)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (ProcessToken)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (ProcessBoleto)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (ProcessiDeal)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (ProcessBancontact)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found (ProcessCard)
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found (ProcessToken)
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found (ProcessBoleto)
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found (ProcessiDeal)
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found (ProcessBancontact)
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout_Processed (ProcessCard)
+  description: The identified checkout resource is already processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "installments": 1,
+        "mandate": {
+          "type": "recurrent",
+          "user_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.104 Safari/537.36",
+          "user_ip": "172.217.169.174"
+        },
+        "card": {
+          "type": "VISA",
+          "name": "John Doe",
+          "number": "1234567890123456",
+          "expiry_year": "2023",
+          "expiry_month": "01",
+          "cvv": "123",
+          "zip_code": "12345"
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "CHECKOUT_PROCESSED",
+          "message": "Checkout is already processed"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout_Processed (ProcessToken)
+  description: The identified checkout resource is already processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "card",
+        "token": "6878cb7f-6515-47bf-bdd9-1408d270fdce",
+        "customer_id": "831ff8d4cd5958ab5670"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "CHECKOUT_PROCESSED",
+          "message": "Checkout is already processed"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout_Processed (ProcessBoleto)
+  description: The identified checkout resource is already processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "boleto",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "tax_id": "423.378.593-47",
+          "address": {
+            "country": "BR",
+            "city": "São Paulo",
+            "line1": "Rua Gilberto Sabino, 215",
+            "state": "SP",
+            "postal_code": "05425-020"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "CHECKOUT_PROCESSED",
+          "message": "Checkout is already processed"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout_Processed (ProcessiDeal)
+  description: The identified checkout resource is already processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "ideal",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "NL"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "CHECKOUT_PROCESSED",
+          "message": "Checkout is already processed"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout_Processed (ProcessBancontact)
+  description: The identified checkout resource is already processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts/:checkout_id
+    method: PUT
+    mode: json
+    params:path: {
+      checkout_id: 4e425463-3e1b-431d-83fa-1e51c2925e99
+    }
+  
+    body:json: {
+      {
+        "payment_type": "bancontact",
+        "personal_details": {
+          "email": "user@example.com",
+          "first_name": "John",
+          "last_name": "Doe",
+          "address": {
+            "country": "BE"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "CHECKOUT_PROCESSED",
+          "message": "Checkout is already processed"
+        }
+      '''
+    }
+  }
+}

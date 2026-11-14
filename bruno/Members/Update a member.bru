@@ -1,0 +1,329 @@
+meta {
+  name: Update a member
+  type: http
+  seq: 4
+  tags: [
+    Members
+  ]
+}
+
+put {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+  @description('The ID of the member to retrieve.')
+  member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+}
+
+body:json {
+  {
+    "Update member's role": {
+      "roles": [
+        "role_manager"
+      ]
+    },
+    "Update managed user": {
+      "user": {
+        "nickname": "New Employee Name"
+      }
+    }
+  }
+}
+
+docs {
+  Updates a merchant member and returns the updated member.
+  
+  Providing `roles` replaces the member's assigned roles and can grant or revoke access. Providing `metadata` replaces the entire metadata object.
+  For managed users, `user.nickname` changes the display name and `user.password` replaces the password. Updating the password also enables the managed user account.
+}
+
+example {
+  name: 200 Response
+  description: Returns the updated Member object if the update succeeded.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: PUT
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  
+    body:json: {
+      {
+        "Update member's role": {
+          "roles": [
+            "role_manager"
+          ]
+        },
+        "Update managed user": {
+          "user": {
+            "nickname": "New Employee Name"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP",
+          "roles": [
+            "role_admin",
+            "role_owner"
+          ],
+          "permissions": [
+            "members_read",
+            "members_write",
+            "create_moto_payments",
+            "full_transaction_history_view",
+            "refund_transactions",
+            "create_referral",
+            "developer_settings_edit",
+            "developer_settings_access"
+          ],
+          "created_at": "2023-01-20T15:16:17Z",
+          "updated_at": "2023-02-20T15:16:17Z",
+          "user": {
+            "id": "44ca0f5b-813b-46e1-aee7-e6242010662e",
+            "email": "example@sumup.com",
+            "mfa_on_login_enabled": true,
+            "virtual_user": false,
+            "service_account_user": false
+          },
+          "status": "accepted"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Cannot set password or nickname for an invited user.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: PUT
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  
+    body:json: {
+      {
+        "Update member's role": {
+          "roles": [
+            "role_manager"
+          ]
+        },
+        "Update managed user": {
+          "user": {
+            "nickname": "New Employee Name"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/bad-request",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "Request validation failed."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 403 Response
+  description: Cannot change password for managed user. Password was already used before.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: PUT
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  
+    body:json: {
+      {
+        "Update member's role": {
+          "roles": [
+            "role_manager"
+          ]
+        },
+        "Update managed user": {
+          "user": {
+            "nickname": "New Employee Name"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/forbidden",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "You do not have permission to perform this action."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Merchant or member not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: PUT
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  
+    body:json: {
+      {
+        "Update member's role": {
+          "roles": [
+            "role_manager"
+          ]
+        },
+        "Update managed user": {
+          "user": {
+            "nickname": "New Employee Name"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 409 Response
+  description: Cannot update member as some data conflict with existing members.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/members/:member_id
+    method: PUT
+    mode: json
+    params:path: {
+      merchant_code: MK10CL2A
+      member_id: mem_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  
+    body:json: {
+      {
+        "Update member's role": {
+          "roles": [
+            "role_manager"
+          ]
+        },
+        "Update managed user": {
+          "user": {
+            "nickname": "New Employee Name"
+          }
+        }
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/conflict",
+          "title": "Conflict",
+          "status": 409,
+          "detail": "The request conflicts with the current state of the resource."
+        }
+      '''
+    }
+  }
+}

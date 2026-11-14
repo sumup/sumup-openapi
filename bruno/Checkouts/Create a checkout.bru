@@ -1,0 +1,1248 @@
+meta {
+  name: Create a checkout
+  type: http
+  seq: 2
+  tags: [
+    Checkouts
+  ]
+}
+
+post {
+  url: {{baseUrl}}/v0.1/checkouts
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+    "amount": 10.1,
+    "currency": "EUR",
+    "merchant_code": "MH4H92C7",
+    "description": "Purchase",
+    "valid_until": "2030-12-31T23:59:59Z",
+    "redirect_url": "https://sumup.com"
+  }
+}
+
+docs {
+  Creates a payment checkout for the specified merchant, amount, and currency. Supply a `checkout_reference` to identify the payment attempt in your own systems. Creating a checkout does not charge a payment instrument.
+  
+  Set `hosted_checkout.enabled` to `true` to receive a [Hosted Checkout](https://developer.sumup.com/online-payments/checkouts/hosted-checkout/) URL where the customer can complete the payment.
+  Use `redirect_url` for redirect-based payment and 3DS flows. If `return_url` is provided, SumUp sends processing updates to that backend callback URL.
+  
+  Complete the payment through [Hosted Checkout](https://developer.sumup.com/online-payments/checkouts/hosted-checkout/) or the [Payment Widget](https://developer.sumup.com/online-payments/checkouts/card-widget).
+}
+
+example {
+  name: Checkout
+  description: Standard response body for a successfully created checkout
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "redirect_url": "https://sumup.com"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "8ea25ec3-3293-40e9-a165-6d7f3b3073c5",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "merchant_country": "DE",
+          "description": "My Checkout",
+          "return_url": "http://example.com",
+          "id": "88fcf8de-304d-4820-8f1c-ec880290eb92",
+          "status": "PENDING",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "mandate": {
+            "type": "recurrent",
+            "status": "active",
+            "merchant_code": "MH4H92C7"
+          },
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "012345"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout3DS
+  description: Response body for a successfully created 3DS checkout
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "return_url": "http://example.com/",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "8ea25ec3-3293-40e9-a165-6d7f3b3073c5",
+          "amount": 10.1,
+          "currency": "EUR",
+          "description": "My Checkout",
+          "return_url": "http://example.com",
+          "id": "88fcf8de-304d-4820-8f1c-ec880290eb92",
+          "status": "PENDING",
+          "date": "2020-02-29T10:56:56+00:00",
+          "valid_until": "2030-12-31T23:59:59Z",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "redirect_url": "https://mysite.com/completed_purchase",
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "012345"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: CheckoutAPM
+  description: Response body for APMs, including Blik, iDeal, ...
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "8ea25ec3-3293-40e9-a165-6d7f3b3073c5",
+          "amount": 10.1,
+          "currency": "EUR",
+          "merchant_code": "MH4H92C7",
+          "description": "My Checkout",
+          "return_url": "http://example.com",
+          "id": "88fcf8de-304d-4820-8f1c-ec880290eb92",
+          "status": "PENDING",
+          "date": "2021-06-29T11:08:36.000+00:00",
+          "merchant_name": "My company",
+          "merchant_country": "DE",
+          "redirect_url": "https://sumup.com",
+          "purpose": "CHECKOUT",
+          "transactions": [
+            {
+              "id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "vat_amount": 6,
+              "tip_amount": 3,
+              "entry_mode": "CUSTOMER_ENTRY",
+              "auth_code": "012345"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: HostedCheckout
+  description: Response body for a checkout with a SumUp-hosted payment page
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+        "amount": 12,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "A sample checkout",
+        "hosted_checkout": {
+          "enabled": true
+        },
+        "redirect_url": "https://example.com/orders/123/complete"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+          "amount": 12,
+          "currency": "EUR",
+          "merchant_code": "MCXXXXXX",
+          "merchant_country": "DE",
+          "merchant_name": "Sample Shop",
+          "description": "A sample checkout",
+          "id": "64553e20-3f0e-49e4-8af3-fd0eca86ce91",
+          "status": "PENDING",
+          "date": "2000-01-01T12:49:24.899+00:00",
+          "purpose": "CHECKOUT",
+          "hosted_checkout": {
+            "enabled": true
+          },
+          "hosted_checkout_url": "https://checkout.sumup.com/pay/8f9316a3-cda9-42a9-9771-54d534315676",
+          "transactions": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Checkout for saving a card
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "save-card-123",
+        "amount": 1,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "Save a card for future payments",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "purpose": "SETUP_RECURRING_PAYMENT"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "checkout_reference": "save-card-123",
+          "amount": 1,
+          "currency": "EUR",
+          "merchant_code": "MCXXXXXX",
+          "description": "Save a card for future payments",
+          "customer_id": "831ff8d4cd5958ab5670",
+          "purpose": "SETUP_RECURRING_PAYMENT",
+          "id": "7164c99b-13cb-42a1-8ba1-3c2c46a29de7",
+          "status": "PENDING",
+          "date": "2026-10-30T12:00:00+00:00",
+          "transactions": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing_Parameter (Checkout)
+  description: A required parameter is missing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "redirect_url": "https://sumup.com"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "MISSING",
+          "param": "merchant_code"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing_Parameter (Checkout3DS)
+  description: A required parameter is missing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "return_url": "http://example.com/",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "MISSING",
+          "param": "merchant_code"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing_Parameter (CheckoutAPM)
+  description: A required parameter is missing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "MISSING",
+          "param": "merchant_code"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing_Parameter (HostedCheckout)
+  description: A required parameter is missing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+        "amount": 12,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "A sample checkout",
+        "hosted_checkout": {
+          "enabled": true
+        },
+        "redirect_url": "https://example.com/orders/123/complete"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "MISSING",
+          "param": "merchant_code"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing_Parameter (Save a customer card)
+  description: A required parameter is missing.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "save-card-123",
+        "amount": 1,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "Save a card for future payments",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "purpose": "SETUP_RECURRING_PAYMENT"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "MISSING",
+          "param": "merchant_code"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (Checkout)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "redirect_url": "https://sumup.com"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (Checkout3DS)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "return_url": "http://example.com/",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (CheckoutAPM)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (HostedCheckout)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+        "amount": 12,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "A sample checkout",
+        "hosted_checkout": {
+          "enabled": true
+        },
+        "redirect_url": "https://example.com/orders/123/complete"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details (Save a customer card)
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "save-card-123",
+        "amount": 1,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "Save a card for future payments",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "purpose": "SETUP_RECURRING_PAYMENT"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (Checkout)
+  description: You do not have the required permission for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "redirect_url": "https://sumup.com"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "checkout_payments_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (Checkout3DS)
+  description: You do not have the required permission for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "return_url": "http://example.com/",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "checkout_payments_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (CheckoutAPM)
+  description: You do not have the required permission for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "checkout_payments_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (HostedCheckout)
+  description: You do not have the required permission for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+        "amount": 12,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "A sample checkout",
+        "hosted_checkout": {
+          "enabled": true
+        },
+        "redirect_url": "https://example.com/orders/123/complete"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "checkout_payments_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (Save a customer card)
+  description: You do not have the required permission for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "save-card-123",
+        "amount": 1,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "Save a card for future payments",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "purpose": "SETUP_RECURRING_PAYMENT"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "checkout_payments_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Existing_Checkout (Checkout)
+  description: A resource with the specified parameters already exists on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "valid_until": "2030-12-31T23:59:59Z",
+        "redirect_url": "https://sumup.com"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "DUPLICATED_CHECKOUT",
+          "message": "Checkout with this checkout reference and pay to email already exists"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Existing_Checkout (Checkout3DS)
+  description: A resource with the specified parameters already exists on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "description": "Purchase",
+        "return_url": "http://example.com/",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "DUPLICATED_CHECKOUT",
+          "message": "Checkout with this checkout reference and pay to email already exists"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Existing_Checkout (CheckoutAPM)
+  description: A resource with the specified parameters already exists on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "f00a8f74-b05d-4605-bd73-2a901bae5802",
+        "amount": 10.1,
+        "currency": "EUR",
+        "merchant_code": "MH4H92C7",
+        "redirect_url": "https://mysite.com/completed_purchase"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "DUPLICATED_CHECKOUT",
+          "message": "Checkout with this checkout reference and pay to email already exists"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Existing_Checkout (HostedCheckout)
+  description: A resource with the specified parameters already exists on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "b50pr914-6k0e-3091-a592-890010285b3d",
+        "amount": 12,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "A sample checkout",
+        "hosted_checkout": {
+          "enabled": true
+        },
+        "redirect_url": "https://example.com/orders/123/complete"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "DUPLICATED_CHECKOUT",
+          "message": "Checkout with this checkout reference and pay to email already exists"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Existing_Checkout (Save a customer card)
+  description: A resource with the specified parameters already exists on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/checkouts
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "checkout_reference": "save-card-123",
+        "amount": 1,
+        "currency": "EUR",
+        "merchant_code": "MCXXXXXX",
+        "description": "Save a card for future payments",
+        "customer_id": "831ff8d4cd5958ab5670",
+        "purpose": "SETUP_RECURRING_PAYMENT"
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "DUPLICATED_CHECKOUT",
+          "message": "Checkout with this checkout reference and pay to email already exists"
+        }
+      '''
+    }
+  }
+}

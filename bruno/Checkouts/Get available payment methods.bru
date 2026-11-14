@@ -1,0 +1,122 @@
+meta {
+  name: Get available payment methods
+  type: http
+  seq: 1
+  tags: [
+    Checkouts
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/payment-methods
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Payment amount in major units, for example `9.99` for EUR 9.99. When filtering by `amount`, also provide `currency`.')
+  amount: 9.99
+  @description('Three-letter ISO 4217 currency code for which the payment methods should be eligible, for example `EUR`.')
+  currency: EUR
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+}
+
+docs {
+  Lists the payment methods available to the merchant for checkout payments. Use the optional amount and currency filters to check eligibility for a particular payment before presenting payment options to the payer.
+}
+
+example {
+  name: success
+  description: Available payment methods
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/payment-methods
+    method: GET
+    mode: none
+    params:query: {
+      amount: 9.99
+      currency: EUR
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "available_payment_methods": [
+            {
+              "id": "apple_pay"
+            },
+            {
+              "id": "blik"
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter
+  description: One or more of the parameters are invalid.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/payment-methods
+    method: GET
+    mode: none
+    params:query: {
+      amount: 9.99
+      currency: EUR
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "failed_constraints": [
+            {
+              "message": "Currency must also be specified when filtering by amount",
+              "reference": "currency"
+            }
+          ],
+          "status": 400,
+          "title": "Bad Request"
+        }
+      '''
+    }
+  }
+}

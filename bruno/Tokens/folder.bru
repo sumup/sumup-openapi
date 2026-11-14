@@ -1,0 +1,17 @@
+meta {
+  name: Tokens
+}
+
+auth {
+  mode: inherit
+}
+
+docs {
+  Merchant tokens let your application accept card-present payments with SumUp SDKs that support token-based authentication. Use them when you want users to sign in to your application with your own authentication, then accept payments for a SumUp merchant account.
+  
+  Create tokens on your backend using one of the [supported authentication methods](https://developer.sumup.com/api/authentication). Keep your authentication credentials on your backend. Return only the short-lived merchant token to your application and pass its `access_token` to the SDK.
+  
+  Before returning a token, authenticate the user in your application and check that they can accept payments for the requested merchant account. A merchant token is limited to that account and the requested actions, and does not grant permissions beyond those of the identity that created it.
+  
+  Tokens expire 15 minutes after creation. Use `expires_in` to determine the remaining lifetime and create a new token when needed. This endpoint does not return a refresh token. Treat merchant tokens as secrets: send them over HTTPS and keep them out of URLs, logs, and source code.
+}

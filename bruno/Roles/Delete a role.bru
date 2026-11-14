@@ -1,0 +1,130 @@
+meta {
+  name: Delete a role
+  type: http
+  seq: 4
+  tags: [
+    Roles
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+  @description('The ID of the role to retrieve.')
+  role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+}
+
+docs {
+  Delete a custom role.
+}
+
+example {
+  name: 200 Response
+  description: Returns an empty response if the role deletion succeeded.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: 400 Response
+  description: Invalid request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/bad-request",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "Request validation failed."
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Merchant not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+    method: DELETE
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you."
+        }
+      '''
+    }
+  }
+}

@@ -1,0 +1,202 @@
+meta {
+  name: Deactivate a payment instrument
+  type: http
+  seq: 5
+  tags: [
+    Customers
+  ]
+}
+
+delete {
+  url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('The `customer_id` you supplied when creating the customer.')
+  customer_id: 831ff8d4cd5958ab5670
+  @description('Unique token identifying the card saved as a payment instrument resource.')
+  token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+}
+
+docs {
+  Deactivates an identified card payment instrument resource for a customer.
+}
+
+example {
+  name: 204 Response
+  description: Returns an empty response body when the operation succeeds.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+    method: DELETE
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+      token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+    }
+  }
+  
+  response: {
+    status: {
+      code: 204
+      text: No Content
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Request
+  description: The request cannot be processed.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+    method: DELETE
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+      token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "INVALID_REQUEST",
+          "message": "bad request"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+    method: DELETE
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+      token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  description: You do not have required scopes for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+    method: DELETE
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+      token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "request_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id/payment-instruments/:token
+    method: DELETE
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+      token: bcfc8e5f-3b47-4cb9-854b-3b7a4cce7be3
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

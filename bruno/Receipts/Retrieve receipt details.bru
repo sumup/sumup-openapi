@@ -1,0 +1,214 @@
+meta {
+  name: Retrieve receipt details
+  type: http
+  seq: 1
+  tags: [
+    Receipts
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v1.1/receipts/:transaction_id
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Short unique identifier for the merchant.')
+  mid: MH4H92C7
+  @description('Unique identifier of the transaction event to include on the receipt.')
+  tx_event_id: 9567461191
+}
+
+params:path {
+  @description('SumUp unique transaction ID or transaction code, e.g. TS7HDYLSKD.')
+  transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+}
+
+docs {
+  Retrieves structured receipt data for a transaction belonging to the merchant specified by `mid`. The path accepts either the SumUp transaction ID or transaction code. Provide `tx_event_id` to include a specific transaction event, such as a refund, on the receipt.
+}
+
+example {
+  name: 200 Response
+  description: Returns receipt details for the requested transaction.
+  
+  request: {
+    url: {{baseUrl}}/v1.1/receipts/:transaction_id
+    method: GET
+    mode: none
+    params:query: {
+      mid: MH4H92C7
+      tx_event_id: 9567461191
+    }
+  
+    params:path: {
+      transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "transaction_data": {
+            "transaction_code": "TEENSK4W2K",
+            "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+            "merchant_code": "MH4H92C7",
+            "amount": "10.10",
+            "vat_amount": "6.00",
+            "tip_amount": "3.00",
+            "currency": "EUR",
+            "timestamp": "2020-02-29T10:56:56.876Z",
+            "status": "SUCCESSFUL",
+            "payment_type": "ECOM",
+            "entry_mode": "CUSTOMER_ENTRY",
+            "installments_count": 1,
+            "process_as": "CREDIT"
+          },
+          "merchant_data": {
+            "merchant_profile": {
+              "merchant_code": "MH4H92C7"
+            }
+          },
+          "acquirer_data": {
+            "authorization_code": "053201"
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Merchant_Code
+  description: The provided merchant code is invalid.
+  
+  request: {
+    url: {{baseUrl}}/v1.1/receipts/:transaction_id
+    method: GET
+    mode: none
+    params:query: {
+      mid: MH4H92C7
+      tx_event_id: 9567461191
+    }
+  
+    params:path: {
+      transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "is not a valid merchant code",
+          "error_code": "INVALID"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v1.1/receipts/:transaction_id
+    method: GET
+    mode: none
+    params:query: {
+      mid: MH4H92C7
+      tx_event_id: 9567461191
+    }
+  
+    params:path: {
+      transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Event_Not_Found
+  description: The provided transaction event ID cannot be found for this transaction.
+  
+  request: {
+    url: {{baseUrl}}/v1.1/receipts/:transaction_id
+    method: GET
+    mode: none
+    params:query: {
+      mid: MH4H92C7
+      tx_event_id: 9567461191
+    }
+  
+    params:path: {
+      transaction_id: 410fc44a-5956-44e1-b5cc-19c6f8d727a4
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "No such tx event (ID=9567461191) for transaction 4ffb8dfc-7f2b-413d-a497-2ad00766585e",
+          "error_code": "NOT_FOUND"
+        }
+      '''
+    }
+  }
+}

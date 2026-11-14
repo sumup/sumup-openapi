@@ -1,0 +1,182 @@
+meta {
+  name: Retrieve a customer
+  type: http
+  seq: 2
+  tags: [
+    Customers
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/customers/:customer_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('The `customer_id` you supplied when creating the customer.')
+  customer_id: 831ff8d4cd5958ab5670
+}
+
+docs {
+  Retrieves a saved customer using the `customer_id` you supplied when creating the customer.
+}
+
+example {
+  name: 200 Response
+  description: Returns the customer resource.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id
+    method: GET
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "customer_id": "831ff8d4cd5958ab5670",
+          "personal_details": {
+            "first_name": "John",
+            "last_name": "Doe",
+            "email": "user@example.com",
+            "phone": "+491635559723",
+            "birth_date": "1993-12-31",
+            "tax_id": "423.378.593-47",
+            "address": {
+              "city": "Berlin",
+              "country": "DE",
+              "line_1": "Sample street",
+              "line_2": "ap. 5",
+              "postal_code": "10115",
+              "state": "Berlin"
+            }
+          }
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id
+    method: GET
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden
+  description: You do not have required scopes for making this request.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id
+    method: GET
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_message": "request_not_allowed",
+          "error_code": "FORBIDDEN",
+          "status_code": "403"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Not_Found
+  description: The identified resource is not found on the server.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/customers/:customer_id
+    method: GET
+    mode: none
+    params:path: {
+      customer_id: 831ff8d4cd5958ab5670
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "error_code": "NOT_FOUND",
+          "message": "Resource not found"
+        }
+      '''
+    }
+  }
+}

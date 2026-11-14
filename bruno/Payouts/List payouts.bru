@@ -1,0 +1,291 @@
+meta {
+  name: List payouts
+  type: http
+  seq: 1
+  tags: [
+    Payouts
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Start date of the payout period filter, inclusive, in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) `date` format (`YYYY-MM-DD`).')
+  start_date: 2024-02-01
+  @description('End date of the payout period filter, inclusive, in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) `date` format (`YYYY-MM-DD`). Must be greater than or equal to `start_date`.')
+  end_date: 2024-02-29
+  @description('Response format for the payout list.')
+  format: json
+  @description('Maximum number of payout records to return.')
+  limit: 10
+  @description('Sort direction for the returned payouts.')
+  order: asc
+  @description('Response format for the payout list.')
+  ~format: csv
+  @description('Sort direction for the returned payouts.')
+  ~order: desc
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+}
+
+docs {
+  Lists payout and payout-deduction records for the specified merchant account within the requested date range.
+  
+  The response can include:
+  - regular payouts (`type = PAYOUT`)
+  - deduction records for refunds, chargebacks, direct debit returns, or balance adjustments
+  
+  Results are sorted by payout date in the requested `order`.
+}
+
+example {
+  name: 200 Response
+  description: Returns the list of payout and deduction records for the requested period.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+    method: GET
+    mode: none
+    params:query: {
+      start_date: 2024-02-01
+      end_date: 2024-02-29
+      format: json
+      ~format: csv
+      limit: 10
+      order: asc
+      ~order: desc
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "amount": 132.45,
+            "currency": "EUR",
+            "date": "2024-02-29",
+            "fee": 3.12,
+            "id": 123456789,
+            "reference": "payout-2024-02-29",
+            "status": "SUCCESSFUL",
+            "transaction_code": "TEENSK4W2K",
+            "type": "PAYOUT"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: 200 Response
+  description: Returns the list of payout and deduction records for the requested period.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+    method: GET
+    mode: none
+    params:query: {
+      start_date: 2024-02-01
+      end_date: 2024-02-29
+      format: json
+      ~format: csv
+      limit: 10
+      order: asc
+      ~order: desc
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: text/plain
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+        id,type,amount,date,currency,fee,status,reference,transaction_code
+        123456789,PAYOUT,132.45,2024-02-29,EUR,3.12,SUCCESSFUL,payout-2024-02-29,TEENSK4W2K
+      '''
+    }
+  }
+}
+
+example {
+  name: Missing required dates
+  description: Required date filters are missing.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+    method: GET
+    mode: none
+    params:query: {
+      start_date: 2024-02-01
+      end_date: 2024-02-29
+      format: json
+      ~format: csv
+      limit: 10
+      order: asc
+      ~order: desc
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "MISSING",
+            "message": "Validation error: required",
+            "param": "start_date"
+          },
+          {
+            "error_code": "MISSING",
+            "message": "Validation error: required",
+            "param": "end_date"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid date range
+  description: `start_date` cannot be later than `end_date`.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+    method: GET
+    mode: none
+    params:query: {
+      start_date: 2024-02-01
+      end_date: 2024-02-29
+      format: json
+      ~format: csv
+      limit: 10
+      order: asc
+      ~order: desc
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        [
+          {
+            "error_code": "INVALID",
+            "message": "negative date range"
+          }
+        ]
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payouts
+    method: GET
+    mode: none
+    params:query: {
+      start_date: 2024-02-01
+      end_date: 2024-02-29
+      format: json
+      ~format: csv
+      limit: 10
+      order: asc
+      ~order: desc
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}

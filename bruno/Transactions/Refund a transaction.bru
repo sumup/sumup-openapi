@@ -1,0 +1,553 @@
+meta {
+  name: Refund a transaction
+  type: http
+  seq: 1
+  tags: [
+    Transactions
+  ]
+}
+
+post {
+  url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+  body: json
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+  @description('Unique identifier of the transaction.')
+  transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+}
+
+body:json {
+  {}
+}
+
+docs {
+  Refunds a transaction identified by its SumUp transaction ID. Omit the request body to request a full refund, or provide `amount` for a partial refund in the transaction's currency.
+  
+  Retrieve the transaction afterwards to inspect its refunded amount and refund events. The transaction must be eligible for a refund; see the error responses for invalid amounts, permissions, and processing failures.
+}
+
+example {
+  name: 201 Response (Full refund)
+  description: The transaction was refunded in full or partially based on the request.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {}
+      '''
+    }
+  }
+}
+
+example {
+  name: 201 Response (Partial refund)
+  description: The transaction was refunded in full or partially based on the request.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {}
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Amount (Full refund)
+  description: The refund amount is invalid.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/bad-request",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "amount must be greater than zero"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Amount (Partial refund)
+  description: The refund amount is invalid.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/bad-request",
+          "title": "Bad Request",
+          "status": 400,
+          "detail": "amount must be greater than zero"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (Full refund)
+  description: The authenticated user is not allowed to refund this transaction.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/forbidden",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "users is not allowed to make a refund"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Forbidden (Partial refund)
+  description: The authenticated user is not allowed to refund this transaction.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 403
+      text: Forbidden
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/forbidden",
+          "title": "Forbidden",
+          "status": 403,
+          "detail": "users is not allowed to make a refund"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Transaction_Not_Found (Full refund)
+  description: The identified transaction was not found.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Transaction not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Transaction_Not_Found (Partial refund)
+  description: The identified transaction was not found.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Not Found",
+          "status": 404,
+          "detail": "Transaction not found"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Transaction_Not_Refundable (Full refund)
+  description: The state of the identified transaction resource does not permit the requested operation.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/conflict",
+          "title": "Conflict",
+          "status": 409,
+          "detail": "The transaction is not refundable in its current state"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Transaction_Not_Refundable (Partial refund)
+  description: The state of the identified transaction resource does not permit the requested operation.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 409
+      text: Conflict
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/conflict",
+          "title": "Conflict",
+          "status": 409,
+          "detail": "The transaction is not refundable in its current state"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Refund_Failed (Full refund)
+  description: The payment processor rejected the refund.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {}
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/unprocessable-entity",
+          "title": "Unprocessable Entity",
+          "status": 422,
+          "detail": "Refund failed.",
+          "errors": [
+            {
+              "code": "INVALID_AMOUNT",
+              "detail": "Amount exceeds the refundable amount",
+              "reason": "amount_too_high",
+              "max_refundable_amount": 1000
+            }
+          ]
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Refund_Failed (Partial refund)
+  description: The payment processor rejected the refund.
+  
+  request: {
+    url: {{baseUrl}}/v1.0/merchants/:merchant_code/payments/:transaction_id/refunds
+    method: POST
+    mode: json
+    params:path: {
+      merchant_code: MH4H92C7
+      transaction_id: 4ffb8dfc-7f2b-413d-a497-2ad00766585e
+    }
+  
+    body:json: {
+      {
+        "amount": 24.42
+      }
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 422
+      text: Unprocessable Entity
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/unprocessable-entity",
+          "title": "Unprocessable Entity",
+          "status": 422,
+          "detail": "Refund failed.",
+          "errors": [
+            {
+              "code": "INVALID_AMOUNT",
+              "detail": "Amount exceeds the refundable amount",
+              "reason": "amount_too_high",
+              "max_refundable_amount": 1000
+            }
+          ]
+        }
+      '''
+    }
+  }
+}

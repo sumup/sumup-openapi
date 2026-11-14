@@ -1,0 +1,105 @@
+meta {
+  name: Retrieve a role
+  type: http
+  seq: 3
+  tags: [
+    Roles
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+  @description('The ID of the role to retrieve.')
+  role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+}
+
+docs {
+  Retrieve a custom role by ID.
+}
+
+example {
+  name: 200 Response
+  description: Returns the Role object for a valid identifier.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "id": "role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP",
+          "name": "Senior Shop Manager II",
+          "description": "Manges the shop and the employees.",
+          "permissions": [],
+          "is_predefined": true,
+          "metadata": {},
+          "created_at": "2023-01-20T15:16:17Z",
+          "updated_at": "2023-01-20T15:16:17Z"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: Merchant or role not found.
+  
+  request: {
+    url: {{baseUrl}}/v0.1/merchants/:merchant_code/roles/:role_id
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+      role_id: role_WZsm7QTPhVrompscmPhoGTXXcrd58fr9MOhP
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you."
+        }
+      '''
+    }
+  }
+}
