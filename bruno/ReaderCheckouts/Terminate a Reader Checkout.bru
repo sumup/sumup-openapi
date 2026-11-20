@@ -1,9 +1,9 @@
 meta {
   name: Terminate a Reader Checkout
   type: http
-  seq: 11
+  seq: 2
   tags: [
-    Readers
+    ReaderCheckouts
   ]
 }
 
@@ -18,6 +18,11 @@ params:path {
   merchant_code: MC0X0ABC
   @description('The unique identifier of the Reader')
   reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+headers {
+  @description("Merchant for this request when the access token's user has an accepted membership for more than one merchant. Send the same value on every request in the flow. When the header is absent or blank, the merchant on the access token is used. A code with no accepted membership returns 422.")
+  x-sumup-merchant-code: M1234AB6
 }
 
 docs {
@@ -49,6 +54,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -87,6 +96,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -126,6 +139,10 @@ example {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
   }
   
   response: {
@@ -163,6 +180,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -202,6 +223,10 @@ example {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
   }
   
   response: {
@@ -238,6 +263,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -276,6 +305,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -319,6 +352,10 @@ example {
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   

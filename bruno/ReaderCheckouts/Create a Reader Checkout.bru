@@ -1,9 +1,9 @@
 meta {
   name: Create a Reader Checkout
   type: http
-  seq: 7
+  seq: 1
   tags: [
-    Readers
+    ReaderCheckouts
   ]
 }
 
@@ -18,6 +18,11 @@ params:path {
   merchant_code: MC0X0ABC
   @description('The unique identifier of the Reader')
   reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
+}
+
+headers {
+  @description("Merchant for this request when the access token's user has an accepted membership for more than one merchant. Send the same value on every request in the flow. When the header is absent or blank, the merchant on the access token is used. A code with no accepted membership returns 422.")
+  x-sumup-merchant-code: M1234AB6
 }
 
 body:json {
@@ -48,7 +53,6 @@ body:json {
     "tip_timeout": 60,
     "total_amount": {
       "currency": "EUR",
-      "minor_unit": 2,
       "value": 5033
     }
   }
@@ -86,12 +90,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -135,12 +142,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -184,12 +194,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -233,12 +246,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -282,12 +298,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -331,12 +350,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -379,12 +401,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -428,12 +453,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -531,12 +559,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
@@ -579,12 +610,15 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
     }
   
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
+  
     body:json: {
       {
         "return_url": "https://example.com/sumup/webhook",
         "total_amount": {
           "currency": "EUR",
-          "minor_unit": 2,
           "value": 1500
         }
       }
