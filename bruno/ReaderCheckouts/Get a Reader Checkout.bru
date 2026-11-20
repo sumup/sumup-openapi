@@ -1,9 +1,9 @@
 meta {
   name: Get a Reader Checkout
   type: http
-  seq: 12
+  seq: 3
   tags: [
-    Readers
+    ReaderCheckouts
   ]
 }
 
@@ -20,6 +20,11 @@ params:path {
   reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
   @description('The unique identifier of the Checkout')
   checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+}
+
+headers {
+  @description("Merchant for this request when the access token's user has an accepted membership for more than one merchant. Send the same value on every request in the flow. When the header is absent or blank, the merchant on the access token is used. A code with no accepted membership returns 422.")
+  x-sumup-merchant-code: M1234AB6
 }
 
 docs {
@@ -39,6 +44,10 @@ example {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
       checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -70,7 +79,6 @@ example {
             "status": "pending",
             "total_amount": {
               "currency": "EUR",
-              "minor_unit": 2,
               "value": 10000
             },
             "updated_at": "2026-07-07T20:42:18.117244Z",
@@ -94,6 +102,10 @@ example {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
       checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
@@ -134,6 +146,10 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
       checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
     }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
   }
   
   response: {
@@ -173,6 +189,10 @@ example {
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
       checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
     }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
+    }
   }
   
   response: {
@@ -210,6 +230,10 @@ example {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
       checkout_id: 74ecff66-1655-43ed-8ce3-193f49fa602f
+    }
+  
+    headers: {
+      x-sumup-merchant-code: M1234AB6
     }
   }
   
