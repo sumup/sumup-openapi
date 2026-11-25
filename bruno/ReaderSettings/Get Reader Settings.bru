@@ -1,15 +1,15 @@
 meta {
-  name: Update Reader Settings
+  name: Get Reader Settings
   type: http
-  seq: 10
+  seq: 1
   tags: [
-    Readers
+    ReaderSettings
   ]
 }
 
-patch {
+get {
   url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-  body: json
+  body: none
   auth: inherit
 }
 
@@ -20,48 +20,28 @@ params:path {
   reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
 }
 
-body:json {
-  {
-    "menu_lock": {
-      "enabled": true,
-      "passcode": "1234"
-    }
-  }
-}
-
 docs {
-  Updates the menu lock settings for a Solo reader. The reader must be online.
-  A successful response confirms that the reader applied the update.
+  Returns the menu lock settings for a Solo reader.
   
-  Include at least one of `menu_lock.enabled` or `menu_lock.passcode`.
-  Omitted settings keep their current values. The response contains only the
-  settings included in the request.
+  For an online reader, returns the current settings. For an offline reader,
+  returns the last saved settings, which may differ from its current configuration.
+  Returns `404` if the reader is offline and no saved settings are available.
   
-  When enabling menu lock for a reader without a PIN, include a four-digit PIN
-  in `menu_lock.passcode` in the same request.
+  The response may include the menu lock PIN.
   
 }
 
 example {
   name: 200 Response
-  description: Reader settings updated successfully.
+  description: Reader settings retrieved successfully.
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -83,103 +63,8 @@ example {
             "menu_lock": {
               "enabled": true,
               "passcode": "1234"
-            },
-            "status": "applied"
+            }
           }
-        }
-      '''
-    }
-  }
-}
-
-example {
-  name: 400 Response
-  description: The request body is malformed.
-  
-  request: {
-    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
-    params:path: {
-      merchant_code: MC0X0ABC
-      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
-    }
-  }
-  
-  response: {
-    headers: {
-      Content-Type: application/json
-    }
-  
-    status: {
-      code: 400
-      text: Bad Request
-    }
-  
-    body: {
-      type: json
-      content: '''
-        {
-          "errors": {
-            "detail": "",
-            "type": ""
-          }
-        }
-      '''
-    }
-  }
-}
-
-example {
-  name: 400 Response
-  description: The request body is malformed.
-  
-  request: {
-    url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
-    params:path: {
-      merchant_code: MC0X0ABC
-      reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
-    }
-  }
-  
-  response: {
-    headers: {
-      Content-Type: application/problem+json
-    }
-  
-    status: {
-      code: 400
-      text: Bad Request
-    }
-  
-    body: {
-      type: json
-      content: '''
-        {
-          "detail": "Bad Request",
-          "status": 400,
-          "title": "Bad Request",
-          "type": "https://developer.sumup.com/problem/bad-request"
         }
       '''
     }
@@ -192,20 +77,11 @@ example {
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -239,20 +115,11 @@ example {
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -282,24 +149,15 @@ example {
 
 example {
   name: 404 Response
-  description: The reader was not found.
+  description: The reader was not found, or it is offline and has no saved settings.
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -328,24 +186,15 @@ example {
 
 example {
   name: 404 Response
-  description: The reader was not found.
+  description: The reader was not found, or it is offline and has no saved settings.
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -375,24 +224,15 @@ example {
 
 example {
   name: 422 Response
-  description: The settings are invalid, the reader is offline, the reader model is not supported, the firmware version is unsupported, or the reader could not apply the update.
+  description: The reader model is not supported, the firmware version is unsupported, or the reader could not return its settings.
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -411,8 +251,8 @@ example {
       content: '''
         {
           "errors": {
-            "detail": "The device is offline.",
-            "type": "READER_OFFLINE"
+            "detail": "Reader settings are only supported for Solo readers.",
+            "type": "UNSUPPORTED_DEVICE_MODEL"
           }
         }
       '''
@@ -422,24 +262,15 @@ example {
 
 example {
   name: 422 Response
-  description: The settings are invalid, the reader is offline, the reader model is not supported, the firmware version is unsupported, or the reader could not apply the update.
+  description: The reader model is not supported, the firmware version is unsupported, or the reader could not return its settings.
   
   request: {
     url: {{baseUrl}}/v0.1/merchants/:merchant_code/readers/:reader_id/settings
-    method: PATCH
-    mode: json
+    method: GET
+    mode: none
     params:path: {
       merchant_code: MC0X0ABC
       reader_id: rdr_3MSAFM23CK82VSTT4BN6RWSQ65
-    }
-  
-    body:json: {
-      {
-        "menu_lock": {
-          "enabled": true,
-          "passcode": "1234"
-        }
-      }
     }
   }
   
@@ -457,10 +288,10 @@ example {
       type: json
       content: '''
         {
-          "detail": "The device is offline.",
+          "detail": "Reader settings are only supported for Solo readers.",
           "status": 422,
-          "title": "Reader Offline",
-          "type": "https://developer.sumup.com/problem/reader-offline"
+          "title": "Unsupported Device Model",
+          "type": "https://developer.sumup.com/problem/unsupported-device-model"
         }
       '''
     }
