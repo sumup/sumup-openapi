@@ -1,0 +1,174 @@
+meta {
+  name: Get Merchant
+  type: http
+  seq: 1
+  tags: [
+    Merchants
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v1/merchants/:merchant_code
+  body: none
+  auth: inherit
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MK10CL2A
+}
+
+settings {
+  forwardAuthorizationHeader: false
+}
+
+docs {
+  Returns a Merchant for a valid Merchant code.
+}
+
+example {
+  name: 200 Response
+  description: Returns a Merchant for a valid identifier.
+  
+  request: {
+    url: {{baseUrl}}/v1/merchants/:merchant_code
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "merchant_code": "MK01A8C2",
+          "organization_id": "G0UZPVAX",
+          "business_type": "",
+          "company": {
+            "name": "Gin & Doughnuts Bar GmbH",
+            "merchant_category_code": "1532",
+            "legal_type": "de.freiberufler",
+            "address": {
+              "street_address": [
+                "Paul-Linke-Ufer 39-40",
+                "2. Hinterhof"
+              ],
+              "post_code": "10999",
+              "city": "Berlin",
+              "country": "DE"
+            },
+            "trading_address": {
+              "street_address": [
+                "Paul-Linke-Ufer 39-40",
+                "2. Hinterhof"
+              ],
+              "post_code": "10999",
+              "city": "Berlin",
+              "country": "DE"
+            },
+            "identifiers": [
+              {
+                "ref": "de.gmbh",
+                "value": "HRB 123456"
+              }
+            ],
+            "phone_number": "+420123456789",
+            "website": "https://www.sumup.com",
+            "attributes": {}
+          },
+          "country": "AR",
+          "business_profile": {
+            "name": "Example Coffee",
+            "dynamic_descriptor": "Example Coffee",
+            "website": "https://example.com",
+            "email": "contact@example.com",
+            "phone_number": "+420123456789",
+            "address": {
+              "street_address": [
+                "Paul-Linke-Ufer 39-40",
+                "2. Hinterhof"
+              ],
+              "post_code": "10999",
+              "city": "Berlin",
+              "country": "DE"
+            },
+            "branding": {
+              "footer_text": "Thanks for shopping with us.",
+              "icon": "",
+              "logo": "",
+              "hero": "",
+              "primary_color": "#FF4B3A",
+              "primary_color_fg": "#FF4B3A",
+              "secondary_color": "#FF4B3A",
+              "secondary_color_fg": "#FF4B3A",
+              "background_color": "#FF4B3A"
+            }
+          },
+          "avatar": "",
+          "alias": "",
+          "default_currency": "EUR",
+          "default_locale": "de-DE",
+          "sandbox": false,
+          "meta": {},
+          "classic": {
+            "id": 1234
+          },
+          "version": "chng_01HS0KG3MPVEVWW85E3KNXH55J",
+          "change_status": "",
+          "created_at": "2021-08-31T12:00:00Z",
+          "updated_at": "2021-08-31T12:00:00Z"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: 404 Response
+  description: The requested Merchant does not exist.
+  
+  request: {
+    url: {{baseUrl}}/v1/merchants/:merchant_code
+    method: GET
+    mode: none
+    params:path: {
+      merchant_code: MK10CL2A
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/problem+json
+    }
+  
+    status: {
+      code: 404
+      text: Not Found
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "type": "https://developer.sumup.com/problem/not-found",
+          "title": "Requested resource couldn't be found.",
+          "status": 404,
+          "detail": "The requested resource doesn't exist or does not belong to you.",
+          "instance": ""
+        }
+      '''
+    }
+  }
+}
