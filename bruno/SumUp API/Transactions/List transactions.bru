@@ -1,0 +1,256 @@
+meta {
+  name: List transactions
+  type: http
+  seq: 3
+  tags: [
+    Transactions
+  ]
+}
+
+get {
+  url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+  body: none
+  auth: inherit
+}
+
+params:query {
+  @description('Retrieves the transaction resource with the specified transaction code.')
+  transaction_code: TEENSK4W2K
+  @description('Sort direction for the transaction history. Use `ascending` or `descending`; the default is `ascending`.')
+  order: ascending
+  @description('Maximum number of transactions per page. Must be a positive integer. Defaults to `10` when omitted; a page can contain fewer results.')
+  limit: 10
+  @description('Filters transactions by user email. For multiple values, repeat the query parameter, for example `users[]=first@example.com&users[]=second@example.com`.')
+  users[]: merchant@example.com
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  statuses[]: SUCCESSFUL
+  @description('Filters transactions by the listed final statuses. For multiple values, repeat the query parameter, for example `statuses[]=SUCCESSFUL&statuses[]=REFUNDED`.')
+  statuses[]: REFUNDED
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  payment_types[]: ECOM
+  @description('Filters the returned results by the specified list of payment types used for the transactions.')
+  payment_types[]: POS
+  @description('Filters the returned results by the specified list of entry modes.')
+  entry_modes[]: customer entry
+  @description('Filters the returned results by the specified list of entry modes.')
+  entry_modes[]: chip
+  @description('Filters the returned results by the specified list of transaction types.')
+  types[]: PAYMENT
+  @description('Filters the returned results by the specified list of transaction types.')
+  types[]: REFUND
+  @description('Filters the results by the latest modification time of resources and returns only transactions that are modified *at or after* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  changes_since: 2019-08-28T09:00:00Z
+  @description('Filters the results by the creation time of resources and returns only transactions that are created *before* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  newest_time: 2019-08-29T09:00:00Z
+  @description('Pagination reference that returns results before the specified reference. Use the value from a returned pagination link rather than constructing it yourself. This parameter takes precedence over `newest_time` when both are provided.')
+  newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+  @description('Filters the results by the creation time of resources and returns only transactions that are created *at or after* the specified timestamp (in [ISO8601](https://en.wikipedia.org/wiki/ISO_8601) format).')
+  oldest_time: 2019-08-28T09:00:00Z
+  @description('Pagination reference that returns results after the specified reference. Use the value from a returned pagination link rather than constructing it yourself. This parameter takes precedence over `oldest_time` when both are provided.')
+  oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+  @description('Sort direction for the transaction history. Use `ascending` or `descending`; the default is `ascending`.')
+  ~order: descending
+}
+
+params:path {
+  @description('Short unique identifier for the merchant.')
+  merchant_code: MH4H92C7
+}
+
+settings {
+  forwardAuthorizationHeader: false
+}
+
+docs {
+  Lists transaction history for the merchant, with optional filters for payment type, status, and date range. The response contains the current page in `items` and pagination query strings in `links`.
+  
+  To request another page, use the query string from the relevant link's `href` with this history endpoint. Use `changes_since` when retrieving transactions modified since a previous synchronization, including transactions created earlier whose status has changed.
+}
+
+example {
+  name: 200 Response
+  description: Returns a page of transaction history items.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      statuses[]: SUCCESSFUL
+      statuses[]: REFUNDED
+      payment_types[]: ECOM
+      payment_types[]: POS
+      entry_modes[]: customer entry
+      entry_modes[]: chip
+      types[]: PAYMENT
+      types[]: REFUND
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "items": [
+            {
+              "transaction_code": "TEENSK4W2K",
+              "amount": 10.1,
+              "currency": "EUR",
+              "timestamp": "2020-02-29T10:56:56.876Z",
+              "status": "SUCCESSFUL",
+              "payment_type": "ECOM",
+              "installments_count": 1,
+              "merchant_code": "MH4H92C7",
+              "transaction_id": "410fc44a-5956-44e1-b5cc-19c6f8d727a4",
+              "user": "merchant@example.com",
+              "type": "PAYMENT",
+              "payout_date": "2019-08-28",
+              "payout_type": "BANK_ACCOUNT",
+              "refunded_amount": 0
+            }
+          ],
+          "links": []
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Invalid_Parameter
+  description: A request parameter has an invalid value.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      statuses[]: SUCCESSFUL
+      statuses[]: REFUNDED
+      payment_types[]: ECOM
+      payment_types[]: POS
+      entry_modes[]: customer entry
+      entry_modes[]: chip
+      types[]: PAYMENT
+      types[]: REFUND
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 400
+      text: Bad Request
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "message": "Validation error",
+          "error_code": "INVALID"
+        }
+      '''
+    }
+  }
+}
+
+example {
+  name: Problem_Details
+  description: Unauthorized response returned by API gateway.
+  
+  request: {
+    url: {{baseUrl}}/v2.1/merchants/:merchant_code/transactions/history
+    method: GET
+    mode: none
+    params:query: {
+      transaction_code: TEENSK4W2K
+      order: ascending
+      ~order: descending
+      limit: 10
+      users[]: merchant@example.com
+      statuses[]: SUCCESSFUL
+      statuses[]: REFUNDED
+      payment_types[]: ECOM
+      payment_types[]: POS
+      entry_modes[]: customer entry
+      entry_modes[]: chip
+      types[]: PAYMENT
+      types[]: REFUND
+      changes_since: 2019-08-28T09:00:00Z
+      newest_time: 2019-08-29T09:00:00Z
+      newest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+      oldest_time: 2019-08-28T09:00:00Z
+      oldest_ref: 090df9bf-93b7-40f1-8181-fbdb236568a1
+    }
+  
+    params:path: {
+      merchant_code: MH4H92C7
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 401
+      text: Unauthorized
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {
+          "detail": "Unauthorized.",
+          "status": 401,
+          "title": "Unauthorized",
+          "trace_id": "3c77294349d3b5647ea2d990f0d8f017",
+          "type": "https://developer.sumup.com/problem/unauthorized"
+        }
+      '''
+    }
+  }
+}
